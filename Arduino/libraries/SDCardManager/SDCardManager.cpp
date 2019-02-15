@@ -19,7 +19,7 @@ extern rgb_lcd lcd;
 extern char sensorDirName[10];
 extern char lifeCycleFileName[10];
 extern char remFileName[10];
- const int chipSelect = 10;
+const int chipSelect = 10;
 extern const char *MAXIMUM_VALUE;//="Max";
 extern const char *MINIMUM_VALUE;//="Min";
 extern const char *AVERAGE_VALUE;//="Avg";
@@ -32,25 +32,86 @@ extern const char  *unstraferedFileName;// ="Untransf.txt";
 extern char sensorDirName[10];
 extern char lifeCycleFileName[10];
 extern char remFileName[10];
+TimeManager & timeManager;
+	GeneralFunctions & generalFunctions;
+	HardwareSerial& _HardSerial;
 
-
-SDCardManager::SDCardManager(TimeManager t, GeneralFunctions f)
+SDCardManager::SDCardManager(TimeManager& t, GeneralFunctions& f,HardwareSerial& serial ): timeManager(t), generalFunctions(f), _HardSerial(serial)
 {
 	generalFunctions=f;
 	timeManager=t;
-  //setup SD card
-      Serial.print("Initializing SD card...");
+	//setup SD card
+	_HardSerial.print("Initializing SD card...");
 
-     // see if the SD card is present and can be initialized:
-     if (!SD.begin(chipSelect)) {
-       Serial.println("Card failed, or not present");
-       // don't do anything more:
-       return;
-     }
-     Serial.println("card initialized.");
+	// see if the SD card is present and can be initialized:
+	if (!SD.begin(chipSelect)) {
+		_HardSerial.println("Card failed, or not present");
+		// don't do anything more:
+		return;
+	}
+	_HardSerial.println("card initialized.");
 
 
 }
+
+//
+// Functions that represents commands received via the serial port
+//
+boolean SDCardManager::testWPSSensor(float batteryVoltage, float current, int stateOfCharge, String operatingStatus){
+	long lastWPSRecordSeconds = timeManager.getCurrentTimeInSeconds();
+	char fileName[25];
+	snprintf(fileName, sizeof fileName, "/%s/%s", WPSSensorDataDirName, unstraferedFileName);
+
+	File untransferredFile = SD.open(fileName, FILE_WRITE);
+	if (untransferredFile) {
+		// Write to file
+		;
+
+		untransferredFile.print(lastWPSRecordSeconds);
+		untransferredFile.print("#");
+		untransferredFile.print(batteryVoltage);
+		untransferredFile.print("#");
+		untransferredFile.print(current);
+		untransferredFile.print("#");
+		untransferredFile.print(stateOfCharge);
+		untransferredFile.print("#");
+		untransferredFile.print(operatingStatus);
+
+
+		File sensorFile = SD.open(sensorDirName);
+		long totalDiskUse=getDiskUsage();
+		untransferredFile.print("#");
+		untransferredFile.println(totalDiskUse/1024);
+
+
+		untransferredFile.close(); // close the file
+	}
+}
+
+float SDCardManager::listFiles(){
+
+	File sensorFile = SD.open(sensorDirName );
+	File lifeCycleFile = SD.open(lifeCycleFileName );
+	File rememberedValueFile = SD.open(remFileName );
+
+	long totalDiskUse=printDirectory(sensorFile, 1);
+	_HardSerial.println(" ");
+	_HardSerial.println(lifeCycleFileName);
+	totalDiskUse+=printDirectory(lifeCycleFile, 1);
+	_HardSerial.println(" ");
+	_HardSerial.println(remFileName);
+	totalDiskUse+=printDirectory(rememberedValueFile, 1);
+	sensorFile.close();
+	lifeCycleFile.close();
+	rememberedValueFile.close();
+	float total= (float)totalDiskUse/1024;
+	return total;
+}
+
+
+//
+// End of Functions that represents commands received via the serial port
+//
 
 boolean SDCardManager::readUntransferredFileFromSDCardByDate(int moveData, boolean sendToSerial,const char *dirName, int date, int month, int year){
 	//GetRememberedValueData#0
@@ -74,7 +135,7 @@ boolean SDCardManager::readUntransferredFileFromSDCardByDate(int moveData, boole
 			// Read each line, send it to the serial port
 			// and copy it into today's file
 			String line = uf.readStringUntil('\n');
-			if(sendToSerial)Serial.print(line);
+			if(sendToSerial)_HardSerial.print(line);
 			if(moveData==1)tf.print(line);
 		}
 		uf.close(); // close the file
@@ -120,7 +181,7 @@ boolean readUntransferredFileFromSDCardByDate(int moveData, boolean sendToSerial
 			// Read each line, send it to the serial port
 			// and copy it into today's file
 			String line = uf.readStringUntil('\n');
-			if(sendToSerial)Serial.print(line);
+			if(sendToSerial)_HardSerial.print(line);
 			if(moveData==1)tf.print(line);
 		}
 		uf.close(); // close the file
@@ -236,7 +297,7 @@ boolean SDCardManager::getHistoricalData(const char *dirName, int date, int mont
 			// Read each line, send it to the serial port
 			// and copy it into today's file
 			String line = todayFile1.readStringUntil('\n');
-			Serial.print(line);
+			_HardSerial.print(line);
 		}
 		todayFile1.close(); // close the file
 		//
@@ -295,17 +356,17 @@ long SDCardManager::printDirectory(File dir, int numTabs) {
 			break;
 		}
 		for (uint8_t i=0; i<numTabs; i++) {
-			Serial.print('\t');
+			_HardSerial.print('\t');
 		}
-		Serial.print(entry.name());
+		_HardSerial.print(entry.name());
 		if (entry.isDirectory()) {
-			Serial.println("/");
+			_HardSerial.println("/");
 			printDirectory(entry, numTabs+1);
 		} else {
 			// files have sizes, directories do not
-			Serial.print("\t\t");
+			_HardSerial.print("\t\t");
 			total+=entry.size();
-			Serial.println(entry.size(), DEC);
+			_HardSerial.println(entry.size(), DEC);
 		}
 		entry.close();
 	}

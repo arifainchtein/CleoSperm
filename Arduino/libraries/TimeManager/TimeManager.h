@@ -9,10 +9,15 @@
 #define TIMEMANAGER_H_
 #include <Arduino.h>
 #include <RTClib.h>
+#include <GeneralFunctions.h>
 
 class TimeManager{
+	HardwareSerial& _HardSerial;
+	GeneralFunctions& generalFunctions;
+
 	public:
-		TimeManager();
+		TimeManager(GeneralFunctions& g, HardwareSerial& serial);
+                void start();
 		long dateAsSeconds(uint8_t year, uint8_t month, uint8_t date, uint8_t hour, uint8_t minute, uint8_t second);
 		void hourlyTasks(long time, int previousHour );
 		void dailyTasks(long time, int yesterdayDate, int yesterdayMonth, int yesterdayYear );
@@ -21,6 +26,12 @@ class TimeManager{
 		long getCurrentTimeInSeconds();
 		String getElapsedTimeHoursMinutesSecondsString(long elapsedTime);
 		DateTime getCurrentDateTime();
+		//
+		// Functions that represent Serial commands
+		//
+		boolean getTime();
+		boolean setTime(String);
+
 	private:
 
 		RTC_DS1307 RTC;

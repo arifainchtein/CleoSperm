@@ -1,12 +1,12 @@
 #include "Arduino.h"
-#include "SecretManager.h"
-#include "EEPROM.h"
-#include "totp.h"
-#include "TimeManager.h"
-extern int SECONDOFFSET;
+#include <SecretManager.h>
+#include <EEPROM.h>
+#include <totp.h>
+#include <TimeManager.h>
 
-SecretManager::SecretManager(TimeManager t){
-	timeManager=t;
+
+SecretManager::SecretManager(TimeManager& t): timeManager(t){
+	
 }
 
 void SecretManager::saveSecret(String secret, int numberDigits, int periodSeconds ){

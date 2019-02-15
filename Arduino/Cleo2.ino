@@ -6,12 +6,12 @@
 #include <ChainableLED.h>
 #include <Wire.h>
 #include <RTClib.h>
-#include <TimeManager.h>
-#include <SecretManager.h>
 #include <EEPROM.h>
 #include <SPI.h>
 #include <SD.h>
+#include <TimeManager.h>
 #include <GeneralFunctions.h>
+#include <SecretManager.h>
 #include <SDCardManager.h>
 #include "DHT.h"
 #include <OneWire.h>
@@ -71,8 +71,8 @@ ChainableLED leds(2, 3, 4);
 //
 String ledStatusLine1[]={"","Ra","Sento","Tlaloc"};
 String ledStatusLine2[]={"","","",""};
- String pulseStartTime="";
- String pulseStopTime="";
+String pulseStartTime="";
+String pulseStopTime="";
 String horseNameSecretKey[]={"","","","","","","","","","","","","","","","","","","",""};
 //
 // the lcd at @Cleo:Internal:Actuators:LCD
@@ -152,8 +152,10 @@ boolean pauseDuringWPS=false;
 long currentSleepStartTime=0L;
 long lastWPSStartUp=0L;
 
+float capacitorVoltage= 0;
+#define LOCK_CAPACITOR_PIN A2
 
-
+int SHARED_SECRET_LENGTH=27;
 
 int currentHour=0;
 int currentDay=0;
@@ -219,46 +221,46 @@ const char  *unstraferedFileName ="Untransf.txt";
 char sensorDirName[10];
 char lifeCycleFileName[10];
 char remFileName[10];
-
+int SECONDOFFSET=10;
 
 TimeManager timeManager;
 SecretManager secretManager(timeManager);
 GeneralFunctions generalFunctions;
-SDCardManager sdCardManager(timeManager, generalFunctions);
+SDCardManager sdCardManager(timeManager, generalFunctions, Serial);
 
 
 void hourlyTasks(long time, int previousHour ){
 
-        sdCardManager.storeRememberedValue(time,HOURLY_ENERGY, hourlyBatteryOutEnergy, UNIT_MILLI_AMPERES_HOURS);
-        sdCardManager.storeRememberedValue(time,HOURLY_POWERED_DOWN_IN_LOOP_SECONDS, hourlyPoweredDownInLoopSeconds, UNIT_SECONDS);
-        sdCardManager.storeRememberedValue(time,HOURLY_OPERATING_IN_LOOP_SECONDS, 3600-hourlyPoweredDownInLoopSeconds, UNIT_SECONDS);
-        hourlyBatteryOutEnergy=0;
-        hourlyPoweredDownInLoopSeconds=0;
+	//sdCardManager.storeRememberedValue(time,HOURLY_ENERGY, hourlyBatteryOutEnergy, UNIT_MILLI_AMPERES_HOURS);
+	//sdCardManager.storeRememberedValue(time,HOURLY_POWERED_DOWN_IN_LOOP_SECONDS, hourlyPoweredDownInLoopSeconds, UNIT_SECONDS);
+	//sdCardManager.storeRememberedValue(time,HOURLY_OPERATING_IN_LOOP_SECONDS, 3600-hourlyPoweredDownInLoopSeconds, UNIT_SECONDS);
+	hourlyBatteryOutEnergy=0;
+	hourlyPoweredDownInLoopSeconds=0;
 }
 
 /*
  * this function is called at the beginning of a new day
  */
 void dailyTasks(long time, int yesterdayDate, int yesterdayMonth, int yesterdayYear ){
-        //
-        // move whatever is in untrasferred to the correct date
-        boolean result = sdCardManager.readUntransferredFileFromSDCardByDate( 1,false, RememberedValueDataDirName,yesterdayDate, yesterdayMonth, yesterdayYear );
-        result = sdCardManager.readUntransferredFileFromSDCardByDate( 1,false, WPSSensorDataDirName,yesterdayDate, yesterdayMonth, yesterdayYear);
-        result = sdCardManager.readUntransferredFileFromSDCardByDate( 1,false, LifeCycleDataDirName,yesterdayDate, yesterdayMonth, yesterdayYear);
-        long yesterdayDateSeconds = timeManager.dateAsSeconds(yesterdayYear,yesterdayMonth,yesterdayDate, 0, 0, 0);
-        sdCardManager.storeRememberedValue(time,DAILY_STATS_TIMESTAMP, yesterdayDateSeconds, UNIT_NO_UNIT);
-        sdCardManager.storeRememberedValue(time,DAILY_MINIMUM_BATTERY_VOLTAGE, dailyMinBatteryVoltage, UNIT_VOLT);
-        sdCardManager.storeRememberedValue(time,DAILY_MAXIMUM_BATTERY_VOLTAGE, dailyMaxBatteryVoltage, UNIT_VOLT);
-        sdCardManager.storeRememberedValue(time,DAILY_MINIMUM_BATTERY_CURRENT, dailyMinBatteryCurrent, UNIT_MILLI_AMPERES);
-        sdCardManager.storeRememberedValue(time,DAILY_MAXIMUM_BATTERY_CURRENT, dailyMaxBatteryCurrent, UNIT_MILLI_AMPERES);
-        sdCardManager.storeRememberedValue(time,DAILY_ENERGY, dailyBatteryOutEnergy, UNIT_MILLI_AMPERES_HOURS);
-        sdCardManager.storeRememberedValue(time,DAILY_POWERED_DOWN_IN_LOOP_SECONDS, dailyPoweredDownInLoopSeconds, UNIT_SECONDS);
-        dailyMinBatteryVoltage = 9999.0;
-        dailyMaxBatteryVoltage = -1.0;
-        dailyMinBatteryCurrent = 9999.0;
-        dailyMaxBatteryCurrent = -1.0;
-        dailyBatteryOutEnergy=0.0;
-        dailyPoweredDownInLoopSeconds=0.0;
+	//
+	// move whatever is in untrasferred to the correct date
+	//boolean result = sdCardManager.readUntransferredFileFromSDCardByDate( 1,false, RememberedValueDataDirName,yesterdayDate, yesterdayMonth, yesterdayYear );
+	//result = sdCardManager.readUntransferredFileFromSDCardByDate( 1,false, WPSSensorDataDirName,yesterdayDate, yesterdayMonth, yesterdayYear);
+	//result = sdCardManager.readUntransferredFileFromSDCardByDate( 1,false, LifeCycleDataDirName,yesterdayDate, yesterdayMonth, yesterdayYear);
+	long yesterdayDateSeconds = timeManager.dateAsSeconds(yesterdayYear,yesterdayMonth,yesterdayDate, 0, 0, 0);
+	//sdCardManager.storeRememberedValue(time,DAILY_STATS_TIMESTAMP, yesterdayDateSeconds, UNIT_NO_UNIT);
+	//sdCardManager.storeRememberedValue(time,DAILY_MINIMUM_BATTERY_VOLTAGE, dailyMinBatteryVoltage, UNIT_VOLT);
+	//sdCardManager.storeRememberedValue(time,DAILY_MAXIMUM_BATTERY_VOLTAGE, dailyMaxBatteryVoltage, UNIT_VOLT);
+	//sdCardManager.storeRememberedValue(time,DAILY_MINIMUM_BATTERY_CURRENT, dailyMinBatteryCurrent, UNIT_MILLI_AMPERES);
+	//sdCardManager.storeRememberedValue(time,DAILY_MAXIMUM_BATTERY_CURRENT, dailyMaxBatteryCurrent, UNIT_MILLI_AMPERES);
+	//sdCardManager.storeRememberedValue(time,DAILY_ENERGY, dailyBatteryOutEnergy, UNIT_MILLI_AMPERES_HOURS);
+	//sdCardManager.storeRememberedValue(time,DAILY_POWERED_DOWN_IN_LOOP_SECONDS, dailyPoweredDownInLoopSeconds, UNIT_SECONDS);
+	dailyMinBatteryVoltage = 9999.0;
+	dailyMaxBatteryVoltage = -1.0;
+	dailyMinBatteryCurrent = 9999.0;
+	dailyMaxBatteryCurrent = -1.0;
+	dailyBatteryOutEnergy=0.0;
+	dailyPoweredDownInLoopSeconds=0.0;
 
 }
 
@@ -274,70 +276,70 @@ long getCurrentTimeInSeconds(){
 	DateTime dateTimeNow = timeManager.getCurrentDateTime();
 	long now = timeManager.getCurrentTimeInSeconds();
 	if (currentHour !=dateTimeNow.hour()) {
-			//
-			// we are in a new hour,
-			int previousHour=currentHour;
-			//
-			// now reset
-			currentHour = dateTimeNow.hour();
-			hourlyTasks(now,previousHour);
-		}
-		if (currentDay != dateTimeNow.day()) {
-			//
-			// we are in a new day, so get yesterdays day, month and year
-			int yesterdayDate=currentDay;
-			int yesterdayMonth=currentMonth;
-			int yesterdayYear=currentYear;
-			//
-			// now reset
-			currentDay = dateTimeNow.day();
-			dailyTasks(now,yesterdayDate, yesterdayMonth, yesterdayYear );
-		}
+		//
+		// we are in a new hour,
+		int previousHour=currentHour;
+		//
+		// now reset
+		currentHour = dateTimeNow.hour();
+		hourlyTasks(now,previousHour);
+	}
+	if (currentDay != dateTimeNow.day()) {
+		//
+		// we are in a new day, so get yesterdays day, month and year
+		int yesterdayDate=currentDay;
+		int yesterdayMonth=currentMonth;
+		int yesterdayYear=currentYear;
+		//
+		// now reset
+		currentDay = dateTimeNow.day();
+		dailyTasks(now,yesterdayDate, yesterdayMonth, yesterdayYear );
+	}
 
-		if (currentMonth !=dateTimeNow.month()) {
-			currentMonth=dateTimeNow.month();
-			monthlyTasks(now);
-		}
+	if (currentMonth !=dateTimeNow.month()) {
+		currentMonth=dateTimeNow.month();
+		monthlyTasks(now);
+	}
 
-		if (currentYear !=dateTimeNow.year()) {
-			currentYear=dateTimeNow.year();
-			yearlyTasks(now);
-		}
-		return now;
+	if (currentYear !=dateTimeNow.year()) {
+		currentYear=dateTimeNow.year();
+		yearlyTasks(now);
+	}
+	return now;
 }
 
 float calculateCurrent(){
-   int sensorValue;             //value read from the sensor
-   int sensorMax = 0;
-   uint32_t start_time = millis();
-   while((millis()-start_time) < 100)//sample for 1000ms
-   {
-       sensorValue = analogRead(CURRENT_SENSOR);
-       if (sensorValue > sensorMax)
-       {
-           //record the maximum sensor value
-           sensorMax = sensorValue;
-       }
-   }
+	int sensorValue;             //value read from the sensor
+	int sensorMax = 0;
+	uint32_t start_time = millis();
+	while((millis()-start_time) < 100)//sample for 1000ms
+	{
+		sensorValue = analogRead(CURRENT_SENSOR);
+		if (sensorValue > sensorMax)
+		{
+			//record the maximum sensor value
+			sensorMax = sensorValue;
+		}
+	}
 
-   //the VCC on the Grove interface of the sensor is 5v
-   amplitude_current=(float)(sensorMax-512)/1024*5/185*1000000;
-   effective_value=amplitude_current/1.414;
-   return effective_value;
+	//the VCC on the Grove interface of the sensor is 5v
+	amplitude_current=(float)(sensorMax-512)/1024*5/185*1000000;
+	effective_value=amplitude_current/1.414;
+	return effective_value;
 }
 
 float getBatteryVoltage(){
-    long  sensorValue=analogRead(batteryVoltagePin);
-   long  sum=0;
-   for(int i=0;i<10;i++)
-   {
-      sum=sensorValue+sum;
-      sensorValue=analogRead(batteryVoltagePin);
-      delay(2);
-   }
-   sum=sum/10;
-  float value =(10*sum*4.980/1023.00);
-    return value;
+	long  sensorValue=analogRead(batteryVoltagePin);
+	long  sum=0;
+	for(int i=0;i<10;i++)
+	{
+		sum=sensorValue+sum;
+		sensorValue=analogRead(batteryVoltagePin);
+		delay(2);
+	}
+	sum=sum/10;
+	float value =(10*sum*4.980/1023.00);
+	return value;
 }
 
 void initializeWDT(){
@@ -424,7 +426,7 @@ void enterArduinoSleep(void)
 	if(batteryVoltage>minWPSVoltage){
 		// STORE a lifecycle comma exit record
 		long now = getCurrentTimeInSeconds();
-		sdCardManager.storeLifeCycleEvent(now, LIFE_CYCLE_EVENT_END_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
+		//sdCardManager.storeLifeCycleEvent(now, LIFE_CYCLE_EVENT_END_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
 		lcd.display();
 		lcd.setRGB(255,255,0);
 		lcd.clear();
@@ -519,7 +521,7 @@ void sendWPSAlert(long time, char *faultData, int batteryVoltage){
 	inWPS=true;
 	operatingStatus="WPS";
 	wpsAlertTime=getCurrentTimeInSeconds();
-	sdCardManager.storeRememberedValue(time,faultData, batteryVoltage, UNIT_VOLT);
+	//sdCardManager.storeRememberedValue(time,faultData, batteryVoltage, UNIT_VOLT);
 }
 
 void turnPiOffForced(long time){
@@ -528,10 +530,10 @@ void turnPiOffForced(long time){
 	delay(1000);
 	float batteryVoltageAfter = getBatteryVoltage();
 	float voltageDifferential = 1-(batteryVoltageBefore/batteryVoltageAfter);
-	sdCardManager.storeRememberedValue(time,FORCED_PI_TURN_OFF,0 , operatingStatus);
-	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_BEFORE_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_ATER_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON, voltageDifferential, UNIT_PERCENTAGE);
+	//sdCardManager.storeRememberedValue(time,FORCED_PI_TURN_OFF,0 , operatingStatus);
+	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_BEFORE_PI_ON, batteryVoltageBefore, UNIT_VOLT);
+	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_ATER_PI_ON, batteryVoltageBefore, UNIT_VOLT);
+	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON, voltageDifferential, UNIT_PERCENTAGE);
 }
 
 void turnPiOff(long time){
@@ -540,10 +542,10 @@ void turnPiOff(long time){
 	delay(1000);
 	float batteryVoltageAfter = getBatteryVoltage();
 	float voltageDifferential = 1-(batteryVoltageBefore/batteryVoltageAfter);
-	sdCardManager.storeRememberedValue(time,PI_TURN_OFF,0 , operatingStatus);
-	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_BEFORE_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_ATER_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON, voltageDifferential, UNIT_PERCENTAGE);
+	//sdCardManager.storeRememberedValue(time,PI_TURN_OFF,0 , operatingStatus);
+	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_BEFORE_PI_ON, batteryVoltageBefore, UNIT_VOLT);
+	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_ATER_PI_ON, batteryVoltageBefore, UNIT_VOLT);
+	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON, voltageDifferential, UNIT_PERCENTAGE);
 }
 
 
@@ -554,9 +556,9 @@ void turnPiOn(long time){
 	float batteryVoltageAfter = getBatteryVoltage();
 	float voltageDifferential = 1-(batteryVoltageAfter/batteryVoltageBefore);
 
-	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_BEFORE_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_ATER_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON, voltageDifferential, UNIT_PERCENTAGE);
+	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_BEFORE_PI_ON, batteryVoltageBefore, UNIT_VOLT);
+	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_ATER_PI_ON, batteryVoltageBefore, UNIT_VOLT);
+	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON, voltageDifferential, UNIT_PERCENTAGE);
 }
 
 
@@ -650,7 +652,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 			if(piSleepingRemaining<=0){
 				wpsSleeping=false;
 				if(!digitalRead(PI_POWER_PIN))turnPiOn(time);
-				sdCardManager.storeLifeCycleEvent(time, LIFE_CYCLE_EVENT_END_WPS, LIFE_CYCLE_EVENT_WPS_VALUE);
+				//sdCardManager.storeLifeCycleEvent(time, LIFE_CYCLE_EVENT_END_WPS, LIFE_CYCLE_EVENT_WPS_VALUE);
 
 				lcd.print("Pi ON WPS ");
 				lcd.setCursor(0,1);
@@ -694,10 +696,10 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 					anWPSSensorRecord.dailyPoweredDownInLoopSeconds=dailyPoweredDownInLoopSeconds;
 					anWPSSensorRecord.pauseDuringWPS=pauseDuringWPS;
 					anWPSSensorRecord.operatingStatus=operatingStatus;
-					anWPSSensorRecord.totalDiskUse= sdCardManager.getDiskUsage();
+					anWPSSensorRecord.totalDiskUse= 0; //sdCardManager.getDiskUsage();
 
 
-					sdCardManager.saveWPSSensorRecord( anWPSSensorRecord);
+					//sdCardManager.saveWPSSensorRecord( anWPSSensorRecord);
 					lcd.setRGB(255,255,0);
 				}else{
 					//
@@ -746,7 +748,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 				if( remaining <= 0  ){
 					waitingForWPSConfirmation=false;
 					operatingStatus="WPS";
-					sdCardManager.storeLifeCycleEvent(time, LIFE_CYCLE_EVENT_FORCED_START_WPS, LIFE_CYCLE_EVENT_WPS_VALUE);
+					//sdCardManager.storeLifeCycleEvent(time, LIFE_CYCLE_EVENT_FORCED_START_WPS, LIFE_CYCLE_EVENT_WPS_VALUE);
 					lcd.print("pi off");
 					wpsSleeping=true;
 					currentSleepStartTime = time;
@@ -772,7 +774,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 				if(currentSecondsToPowerOff<=0){
 					currentSecondsToPowerOff=0;
 					turnPiOff(time);
-					sdCardManager.storeLifeCycleEvent(time, LIFE_CYCLE_EVENT_START_WPS, LIFE_CYCLE_EVENT_WPS_VALUE);
+					//sdCardManager.storeLifeCycleEvent(time, LIFE_CYCLE_EVENT_START_WPS, LIFE_CYCLE_EVENT_WPS_VALUE);
 					wpsSleeping=true;
 					wpsCountdown=false;
 					currentSleepStartTime=time;
@@ -789,7 +791,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 				if(piSleepingRemaining<=0){
 					wpsSleeping=false;
 					if(!digitalRead(PI_POWER_PIN))turnPiOn(time);
-					sdCardManager.storeLifeCycleEvent(time, LIFE_CYCLE_EVENT_END_WPS, LIFE_CYCLE_EVENT_WPS_VALUE);
+					//sdCardManager.storeLifeCycleEvent(time, LIFE_CYCLE_EVENT_END_WPS, LIFE_CYCLE_EVENT_WPS_VALUE);
 
 					lcd.print("Pi ON WPS ");
 					lcd.setCursor(0,1);
@@ -833,9 +835,9 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 						anWPSSensorRecord.dailyPoweredDownInLoopSeconds=dailyPoweredDownInLoopSeconds;
 						anWPSSensorRecord.pauseDuringWPS=pauseDuringWPS;
 						anWPSSensorRecord.operatingStatus=operatingStatus;
-						anWPSSensorRecord.totalDiskUse= sdCardManager.getDiskUsage();
+						anWPSSensorRecord.totalDiskUse=989; //sdCardManager.getDiskUsage();
 
-						sdCardManager.saveWPSSensorRecord( anWPSSensorRecord);
+						//sdCardManager.saveWPSSensorRecord( anWPSSensorRecord);
 						lcd.setRGB(255,255,0);
 					}else{
 						//
@@ -890,7 +892,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 				if( remaining <= 0  ){
 					waitingForWPSConfirmation=false;
 					operatingStatus="WPS";
-					sdCardManager.storeLifeCycleEvent(time, LIFE_CYCLE_EVENT_FORCED_START_WPS, LIFE_CYCLE_EVENT_WPS_VALUE);
+					//sdCardManager.storeLifeCycleEvent(time, LIFE_CYCLE_EVENT_FORCED_START_WPS, LIFE_CYCLE_EVENT_WPS_VALUE);
 					wpsSleeping=false;
 					currentSecondsToPowerOff=0L;
 					if(piIsOn)turnPiOff(time);
@@ -908,7 +910,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 						delay(2000);
 						lcd.setRGB(0,0,0);
 						lcd.noDisplay();
-						sdCardManager.storeLifeCycleEvent(time,LIFE_CYCLE_EVENT_START_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
+						//sdCardManager.storeLifeCycleEvent(time,LIFE_CYCLE_EVENT_START_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
 						enterArduinoSleep();
 					}
 				}else{
@@ -930,7 +932,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 				if(currentSecondsToPowerOff<=0){
 					currentSecondsToPowerOff=0;
 					if(piIsOn)turnPiOff(time);
-					sdCardManager.storeLifeCycleEvent(time, LIFE_CYCLE_EVENT_START_WPS, LIFE_CYCLE_EVENT_WPS_VALUE);
+					//sdCardManager.storeLifeCycleEvent(time, LIFE_CYCLE_EVENT_START_WPS, LIFE_CYCLE_EVENT_WPS_VALUE);
 					wpsSleeping=false;
 					wpsCountdown=false;
 					if(f_wdt == 1){
@@ -945,7 +947,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 						delay(2000);
 						lcd.setRGB(0,0,0);
 						lcd.noDisplay();
-						sdCardManager.storeLifeCycleEvent(time,LIFE_CYCLE_EVENT_START_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
+						//sdCardManager.storeLifeCycleEvent(time,LIFE_CYCLE_EVENT_START_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
 						enterArduinoSleep();
 					}
 				}
@@ -968,7 +970,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 					delay(2000);
 					lcd.setRGB(0,0,0);
 					lcd.noDisplay();
-					sdCardManager.storeLifeCycleEvent(time,LIFE_CYCLE_EVENT_START_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
+					//sdCardManager.storeLifeCycleEvent(time,LIFE_CYCLE_EVENT_START_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
 					enterArduinoSleep();
 				}
 			}else if(piIsOn){
@@ -989,27 +991,28 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 
 
 void setup() {
-  // put your setup code here, to run once:
- lcd.begin(16,2);
-  Serial.begin(9600);
-    lcd.clear();
-  lcd.setCursor(0, 0);
+	// put your setup code here, to run once:
+	lcd.begin(16,2);
+	Serial.begin(9600);
+	timeManager.start();
+	lcd.clear();
+	lcd.setCursor(0, 0);
 
-  pinMode(CURRENT_SENSOR, INPUT);
-  pinMode(PI_POWER_PIN, OUTPUT);
+	pinMode(CURRENT_SENSOR, INPUT);
+	pinMode(PI_POWER_PIN, OUTPUT);
 
-  lcd.print("initializing" );
-  leds.setColorRGB(0, 255, 255, 0);
-  leds.setColorRGB(1, 0, 0, 0);
-  leds.setColorRGB(2, 0, 0, 0);
-  leds.setColorRGB(3, 0, 0, 0);
+	lcd.print("initializing" );
+	leds.setColorRGB(0, 255, 255, 0);
+	leds.setColorRGB(1, 255, 0, 0);
+	leds.setColorRGB(2, 0, 0, 255);
+	leds.setColorRGB(3, 0, 255, 0);
 
-  pinMode(selectPin, INPUT);
-  pinMode(actionPin, INPUT);
+	pinMode(selectPin, INPUT);
+	pinMode(actionPin, INPUT);
 
 
-    //setup clock
-    Wire.begin();
+	//setup clock
+	Wire.begin();
 
 
 
@@ -1020,268 +1023,612 @@ void setup() {
 
 void loop() {
 
-	 if(!powerSupplyOn){
-	      digitalWrite(PI_POWER_PIN, HIGH);
-	      powerSupplyOn=true;
-	    }
+	if(!powerSupplyOn){
+		digitalWrite(PI_POWER_PIN, HIGH);
+		powerSupplyOn=true;
+	}
 
 
 
-  if(!inPulse){
-    selectButtonValue = digitalRead(selectPin);  // read input value
+	if(!inPulse){
+		selectButtonValue = digitalRead(selectPin);  // read input value
+
+		if (selectButtonValue != selectLastButtonState) {
+			// reset the debouncing timer
+			selectLastDebounceTime = millis();
+			Serial.println("p2=");
+
+		}
+
+		if ((millis() - selectLastDebounceTime) > debounceDelay) {
+			// whatever the reading is at, it's been there for longer
+			// than the debounce delay, so take it as the actual current state:
+			// if the button state has changed:
+
+			if (selectButtonValue != selectButtonState) {
+				//Serial.println("p3=");
+				selectButtonState = selectButtonValue;
+				if (selectButtonState != HIGH) {
+					lastActionTime=millis();
+					//
+					// if we are here then we just clicked this
+					//
+				}
+			}
+		}
+		selectLastButtonState = selectButtonValue;
+		// check and debounce the action button
+		//
+		actionButtonValue = digitalRead(actionPin);  // read input value
+		if (actionButtonValue != actionLastButtonState) {
+			// reset the debouncing timer
+			actionLastDebounceTime = millis();
+		}
+
+		if ((millis() - actionLastDebounceTime) > debounceDelay) {
+			// whatever the reading is at, it's been there for longer
+			// than the debounce delay, so take it as the actual current state:
+			// if the button state has changed:
+			if (actionButtonValue != actionButtonState) {
+				actionButtonState = actionButtonValue;
+				if (actionButtonState != HIGH) {
+					lastActionTime=millis();
+					showingAct=true;
+					if(currentViewIndex>=1 && currentViewIndex<=3){
+						lcd.clear();
+						lcd.setCursor(0, 0);
+						lcd.print(ledStatusLine1[currentViewIndex] );
+						lcd.setCursor(0, 1);
+						lcd.print("ABCDEFG" );
+					}else if(currentViewIndex==4){
+						lcd.clear();
+						lcd.setCursor(0, 0);
+						lcd.print("Password Keeper" );
+						lcd.setCursor(0, 1);
+						lcd.print("Click Act to See" );
+					}else if(currentViewIndex==5){
+						Serial.println("Shutdown");
+						Serial.flush();
+						lcd.clear();
+						lcd.setCursor(0, 0);
+						lcd.print("Shutting Down" );
+						lcd.setCursor(0, 1);
+						lcd.print("See you soon" );
+					}
 
 
-      if (selectButtonValue != selectLastButtonState) {
-        // reset the debouncing timer
-        selectLastDebounceTime = millis();
-       Serial.println("p2=");
-
-      }
-
-      if ((millis() - selectLastDebounceTime) > debounceDelay) {
-          // whatever the reading is at, it's been there for longer
-          // than the debounce delay, so take it as the actual current state:
-          // if the button state has changed:
-
-          if (selectButtonValue != selectButtonState) {
-             Serial.println("p3=");
-              selectButtonState = selectButtonValue;
-              if (selectButtonState != HIGH) {
-                lastActionTime=millis();
-                //
-                // if we are here then we just clicked this
-                //
-              }
-          }
-        }
-        selectLastButtonState = selectButtonValue;
-
-
-    //
-     // check and debounce the action button
-     //
-      actionButtonValue = digitalRead(actionPin);  // read input value
-      if (actionButtonValue != actionLastButtonState) {
-        // reset the debouncing timer
-        actionLastDebounceTime = millis();
-      }
-     // Serial.println("p2");
-      if ((millis() - actionLastDebounceTime) > debounceDelay) {
-          // whatever the reading is at, it's been there for longer
-          // than the debounce delay, so take it as the actual current state:
-          // if the button state has changed:
-          if (actionButtonValue != actionButtonState) {
-              actionButtonState = actionButtonValue;
-              if (actionButtonState != HIGH) {
-                lastActionTime=millis();
-                  showingAct=true;
-                  if(currentViewIndex>=1 && currentViewIndex<=3){
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print(ledStatusLine1[currentViewIndex] );
-                      lcd.setCursor(0, 1);
-                      lcd.print("ABCDEFG" );
-                    }else if(currentViewIndex==4){
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Password Keeper" );
-                      lcd.setCursor(0, 1);
-                      lcd.print("Click Act to See" );
-                    }else if(currentViewIndex==5){
-                      Serial.println("Shutdown");
-                      Serial.flush();
-                      lcd.clear();
-                      lcd.setCursor(0, 0);
-                      lcd.print("Shutting Down" );
-                      lcd.setCursor(0, 1);
-                      lcd.print("See you soon" );
-                    }
-
-
-              }
-          }
-        }
-    }
-    actionLastButtonState = actionButtonValue;
+				}
+			}
+		}
+	}
+	actionLastButtonState = actionButtonValue;
 
 
 
+	wdt_reset();
+
+	float batteryVoltage = getBatteryVoltage();
+	int internalBatteryStateOfCharge = generalFunctions.getStateOfCharge(batteryVoltage);
+	float currentValue = calculateCurrent();
+	long  lockCapacitorValue=analogRead(LOCK_CAPACITOR_PIN);
+	capacitorVoltage= lockCapacitorValue * (5.0 / 1023.0);
+	boolean piIsOn = digitalRead(PI_POWER_PIN);
+	ambientTemperature = dht.readTemperature();
+	ambientHumidity = dht.readHumidity();
 
 
 
-    ambientTemperature = dht.readTemperature();
-    	   ambientHumidity = dht.readHumidity();
 
 
 
 
+	//
+	// Generate the SensorData String
+	toReturn="";
+	//
+	// Sensor Request Queue Position 1
+	//
+	char batteryVoltageStr[15];
+	dtostrf(batteryVoltage,4, 1, batteryVoltageStr);
+	toReturn.concat(batteryVoltageStr) ;
+	toReturn.concat("#") ;
+
+	//
+	// Sensor Request Queue Position 2
+	//
+	char currentValueStr[15];
+	dtostrf(currentValue,4, 0, currentValueStr);
+	toReturn.concat(currentValueStr) ;
+	toReturn.concat("#") ;
+
+	//
+	// Sensor Request Queue Position 3
+	//
+	char capacitorVoltageStr[15];
+	dtostrf(capacitorVoltage,2, 1, capacitorVoltageStr);
+	toReturn.concat(capacitorVoltageStr) ;
+	toReturn.concat("#") ;
 
 
- float batteryVoltage =getBatteryVoltage();
-float currentValue = calculateCurrent();
+	//
+	// Sensor Request Queue Position 4
+	//
+	toReturn.concat( internalBatteryStateOfCharge);
+	toReturn.concat("#") ;
+	//
+	// Sensor Request Queue Position 5
+	//
 
-  toReturn="";
-  char batteryVoltageStr[15];
-    dtostrf(batteryVoltage,4, 1, batteryVoltageStr);
+	toReturn.concat( operatingStatus);
+	toReturn.concat("#") ;
 
-     char currentValueStr[15];
-    dtostrf(currentValue,4, 0, currentValueStr);
+	//
+	// Sensor Request Queue Position 6
+	//
 
-    toReturn.concat(batteryVoltageStr) ;
-    toReturn.concat("#") ;
-    toReturn.concat(currentValueStr) ;
-    toReturn.concat("#") ;
+	char dailyMinBatteryVoltageStr[15];
+	dtostrf(dailyMinBatteryVoltage,4, 0, dailyMinBatteryVoltageStr);
+	toReturn.concat(dailyMinBatteryVoltageStr) ;
+	toReturn.concat("#") ;
 
-    if(inPulse){
-      lcd.setCursor(0, 0);
-       lcd.print("Executing Pulse" );
-       lcd.setCursor(0, 1);
-       lcd.print( "Started at " );
-       lcd.print(  pulseStartTime );
-    }else{
-     if(!showingAct){
-        if(currentViewIndex==0){
+	//
+	// Sensor Request Queue Position 7
+	//
 
-          lcd.setCursor(0, 0);
-          lcd.print(batteryVoltageStr );
-          lcd.print("V " );
-          lcd.print(currentValueStr );
-          lcd.print("mA" );
-          lcd.setCursor(0, 1);
-          lcd.print(currentIpAddress );
+	char dailyMaxBatteryVoltageStr[15];
+	dtostrf(dailyMaxBatteryVoltage,4, 0, dailyMaxBatteryVoltageStr);
+	toReturn.concat(dailyMaxBatteryVoltageStr) ;
+	toReturn.concat("#") ;
+
+	//
+	// Sensor Request Queue Position 8
+	//
+
+	char dailyMinBatteryCurrentStr[15];
+	dtostrf(dailyMinBatteryCurrent,4, 0, dailyMinBatteryCurrentStr);
+	toReturn.concat(dailyMinBatteryCurrentStr) ;
+	toReturn.concat("#") ;
+
+	//
+	// Sensor Request Queue Position 9
+	//
+
+	char dailyMaxBatteryCurrentStr[15];
+	dtostrf(dailyMaxBatteryCurrent,4, 0, dailyMaxBatteryCurrentStr);
+	toReturn.concat(dailyMaxBatteryCurrentStr) ;
+	toReturn.concat("#") ;
+
+	//
+	// Sensor Request Queue Position 10
+	//
+
+	char dailyBatteryOutEnergyStr[15];
+	dtostrf(dailyBatteryOutEnergy,4, 0, dailyBatteryOutEnergyStr);
+	toReturn.concat(dailyBatteryOutEnergyStr) ;
+	toReturn.concat("#") ;
+
+	//
+	// Sensor Request Queue Position 11
+	//
+
+	char dailyPoweredDownInLoopSecondsStr[15];
+	dtostrf(dailyPoweredDownInLoopSeconds,4, 0, dailyPoweredDownInLoopSecondsStr);
+	toReturn.concat(dailyPoweredDownInLoopSecondsStr) ;
+	toReturn.concat("#") ;
+
+	//
+	// Sensor Request Queue Position 12
+	//
+
+	char hourlyBatteryOutEnergyStr[15];
+	dtostrf(hourlyBatteryOutEnergy,4, 0, hourlyBatteryOutEnergyStr);
+	toReturn.concat(hourlyBatteryOutEnergyStr) ;
+	toReturn.concat("#") ;
+	//
+	// Sensor Request Queue Position 13
+	//
+
+	char hourlyPoweredDownInLoopSecondsStr[15];
+	dtostrf(hourlyPoweredDownInLoopSeconds,4, 0, hourlyPoweredDownInLoopSecondsStr);
+	toReturn.concat(hourlyPoweredDownInLoopSecondsStr) ;
+	toReturn.concat("#") ;
+
+	//
+	// Sensor Request Queue Position 14
+	//
+
+	long totalDiskUse=sdCardManager.getDiskUsage();
+	toReturn.concat(totalDiskUse/1024);
+	toReturn.concat("#");
+	//
+	// Sensor Request Queue Position 15
+	//
+
+	toReturn.concat(pauseDuringWPS);
+	toReturn.concat("#");
+	//
+	// Sensor Request Queue Position 16
+	//
+	toReturn.concat(ambientTemperature);
+	toReturn.concat("#");
+	//
+	// Sensor Request Queue Position 17
+	//
+	toReturn.concat(ambientHumidity);
+	toReturn.concat("#");
+
+	//lcd.clear();
+	//lcd.setCursor(0, 0);
+
+	long now = getCurrentTimeInSeconds();
+	poweredDownInLoopSeconds=0;
+	defineState(now,  batteryVoltage, internalBatteryStateOfCharge, currentValue, piIsOn);
 
 
-        }else if(currentViewIndex>=1 && currentViewIndex<=3){
 
-          lcd.setCursor(0, 0);
-          lcd.print(ledStatusLine1[currentViewIndex] );
-          lcd.setCursor(0, 1);
-          lcd.print("Get Password" );
-        }else if(currentViewIndex==4){
+	if( Serial.available() != 0) {
+		// lcd.clear();
+		command = Serial.readString();
+		lcd.setCursor(0, 0);
+		lcd.print(command);
 
-          lcd.setCursor(0, 0);
-          lcd.print("Password Keeper" );
-          lcd.setCursor(0, 1);
-          lcd.print("Click Act to See" );
-        }else if(currentViewIndex==5){
+		if(command=="TestWPSSensor"){
+			float batteryVoltage = getBatteryVoltage();
+			float current = calculateCurrent();
+			int stateOfCharge= generalFunctions.getStateOfCharge(batteryVoltage);
+			boolean result = sdCardManager.testWPSSensor( batteryVoltage,  current,  stateOfCharge,  operatingStatus);
+			if(result){
+				Serial.println("Ok-TestWPSSensor");
+			}else{
+				Serial.println("Failure-TestWPSSensor");
+			}
+			Serial.flush();
 
-          lcd.setCursor(0, 0);
-          lcd.print("Shutdown?" );
-          lcd.setCursor(0, 1);
-          lcd.print("Click Act" );
-        }else if(currentViewIndex==7){
+		}else if(command=="TestLifeCycle"){
+			long now = getCurrentTimeInSeconds();
+			sdCardManager.storeLifeCycleEvent(now, LIFE_CYCLE_EVENT_END_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
+			Serial.println("Ok-TestLifeCycle");
+			Serial.flush();
 
-          lcd.setCursor(0, 0);
-          lcd.print("Input Unlock Seq" );
-          lcd.setCursor(0, 1);
-          lcd.print("Last Pulse " );
-          lcd.print(pulseStopTime);
-
-        }
-     }
-  }
-lcd.setCursor(0,1);
- lcd.print("Serial=NA" + Serial.available() );
-  if( Serial.available() != 0) {
-   // lcd.clear();
-     command = Serial.readString();
-    lcd.setCursor(0, 0);
-    lcd.print(command);
-
-    if(command=="Ping"){
-
-    Serial.println("Ok-Ping");
-    Serial.flush();
-  }else if(command.startsWith("PulseStart")){
-    inPulse=true;
-     pulseStartTime = generalFunctions.getValue(command, '#', 1);
-    Serial.println("Ok-PulseStart");
-    Serial.flush();
-    lcd.clear();
-   lcd.setRGB(255,0,0);
-
-  }else if(command.startsWith("PulseFinished")){
-     pulseStopTime = generalFunctions.getValue(command, '#', 1);
-    inPulse=false;
-    Serial.println("Ok-PulseFinished");
-    Serial.flush();
-    lcd.clear();
-    lcd.setRGB(255,255,255);
+		}else if(command=="ListFiles"){
+			Serial.println(" ");
+			Serial.println(" ");
+			Serial.println(sensorDirName);
+			float total = 0.0;//sdCardListFiles();
 
 
+			Serial.println(" ");
 
-  }else if(command.startsWith("IPAddr")){
-      currentIpAddress = generalFunctions.getValue(command, '#', 1);
-      Serial.println("Ok-IPAddr");
-      Serial.flush();
-      delay(delayTime);
-    }else if(command.startsWith("SSID")){
-      currentSSID = generalFunctions.getValue(command, '#', 1);
-      Serial.println("Ok-currentSSID");
-      Serial.flush();
-      delay(delayTime);
-    }else if(command.startsWith("HostMode")  ){
-     Serial.println("Ok-HostMode");
-      Serial.flush();
-      delay(delayTime);
-     isHost=true;
+			Serial.print("Used (Kb):  ");
+			Serial.println(total);
 
-    }else if(command.startsWith("NetworkMode")   ){
-      Serial.println("Ok-NetworkMode");
-      Serial.flush();
-      delay(delayTime);
-      isHost=false;
+			Serial.println("");
+			Serial.println("Ok-ListFiles");
+			Serial.flush();
+		}else if(command=="Ping"){
 
-    }else if(command.startsWith("GetSensorData")){
-       Serial.println(toReturn);
-       Serial.flush();
-    }else if (command.startsWith("UpdateTeleonomeStatus")){
-      int id = generalFunctions.getValue(command, '#', 1).toInt();
-      String statusValue = generalFunctions.getValue(command, '#', 2);
-      String info = generalFunctions.getValue(command, '#', 3);
-      ledStatusLine2[id]=info;
+			Serial.println("Ok-Ping");
+			Serial.flush();
 
-      if(statusValue=="success"){
-         leds.setColorRGB(id, 0, 255, 0);
-      }else  if(statusValue=="warning"){
-        leds.setColorRGB(id, 255, 255, 0);
-      }else  if(statusValue=="danger"){
-       leds.setColorRGB(id, 255, 0, 0);
-      }else  if(statusValue=="primary"){
-       leds.setColorRGB(id, 0, 0, 255);
-      }else  if(statusValue=="crisis"){
-       leds.setColorRGB(id, 255, 165, 0);
-      }else  if(statusValue=="off"){
-       leds.setColorRGB(id, 0, 0, 0);
-      }else  if(statusValue=="stale"){
-       leds.setColorRGB(id, 148, 0, 211);
-      }
-      Serial.println("UpdateTeleonomeStatus");
-      Serial.flush();
-      delay(delayTime);
-  }else if (command.startsWith("StoreSecret")){
-      String horseName = generalFunctions.getValue(command, '#', 1);
-      String horseSecretCode = generalFunctions.getValue(command, '#', 2);
-      String potentialSystemKey = generalFunctions.getValue(command, '#', 3);
+		}else if(command.startsWith("SetTime")){
+			boolean result = timeManager.setTime(command);
+			if(result){
+				Serial.println("Ok-SetTime");
+			}else{
+				Serial.println("Failure-SetTime");
+			}
+			Serial.println("Ok-SetTime");
+			Serial.flush();
 
-      if(systemKey==potentialSystemKey){
-        int numberHorses = sizeof(horseNameSecretKey);
+		}else if(command.startsWith("GetTime")){
+			boolean result = timeManager.getTime();
+			if(result){
+				Serial.println("Ok-GetTime");
+			}else{
+				Serial.println("Failure-GetTime");
+			}
 
-        for(int i=0;i<numberHorses;i++){
+			Serial.flush();
+		}else if(command.startsWith("VerifyUserCode")){
+			String codeInString = generalFunctions.getValue(command, '#', 1);
+			long userCode = codeInString.toInt();
+			boolean validCode = secretManager.checkCode( userCode);
+			String result="Failure-Invalid Code";
+			if(validCode)result="Ok-Valid Code";
+			Serial.println(result);
+			Serial.flush();
+			delay(delayTime);
+		}else if(command.startsWith("GetCommandCode")){
 
-        }
-      }else{
-        Serial.println("StoreSecret-Failed");
-        Serial.flush();
-        delay(delayTime);
-      }
-  }else if (command == "AsyncData" ){
-    Serial.println("Ok-No Data");
-    Serial.flush();
-  }else{
-    Serial.println("Ok-" + command);
-    Serial.flush();
-    delay(delayTime);
-  }
-}
+			long code =secretManager.generateCode();
+			//
+			// patch a bug in the totp library
+			// if the first digit is a zero, it
+			// returns a 5 digit number
+			if(code<100000){
+				Serial.print("0");
+				Serial.println(code);
+			}else{
+				Serial.println(code);
+			}
+			Serial.flush();
+			delay(delayTime);
+		}else if(command.startsWith("GetSecret")){
+			if(capacitorVoltage==0){
+				//
+				// we are in normal operation
+				//
+				Serial.println("Failure-GetSecret");
+				Serial.flush();
+			}else{
+				char secretCode[SHARED_SECRET_LENGTH];
+				secretManager.readSecret(secretCode);
+				Serial.println(secretCode);
+				Serial.println("Ok-GetSecret");
+				Serial.flush();
+				delay(delayTime);
+			}
+
+
+		} else if(command.startsWith("SetSecret")){
+			if(capacitorVoltage==0){
+				//
+				// we are in normal operation
+				//
+				Serial.println("Failure-SetSecret");
+				Serial.flush();
+			}else{
+				String secret = generalFunctions.getValue(command, '#', 1);
+				int numberDigits = generalFunctions.getValue(command, '#', 2).toInt();
+				int periodSeconds = generalFunctions.getValue(command, '#', 3).toInt();
+				secretManager.saveSecret(secret, numberDigits, periodSeconds);
+
+				Serial.println("Ok-SetSecret");
+				Serial.flush();
+			}
+			delay(delayTime);
+		}else if(command.startsWith("PulseStart")){
+			inPulse=true;
+			pulseStartTime = generalFunctions.getValue(command, '#', 1);
+			Serial.println("Ok-PulseStart");
+			Serial.flush();
+			lcd.clear();
+			lcd.setRGB(255,0,0);
+
+		}else if(command.startsWith("PulseFinished")){
+			pulseStopTime = generalFunctions.getValue(command, '#', 1);
+			inPulse=false;
+			Serial.println("Ok-PulseFinished");
+			Serial.flush();
+			lcd.clear();
+			lcd.setRGB(255,255,255);
+
+
+
+		}else if(command.startsWith("IPAddr")){
+			currentIpAddress = generalFunctions.getValue(command, '#', 1);
+			Serial.println("Ok-IPAddr");
+			Serial.flush();
+			delay(delayTime);
+		}else if(command.startsWith("SSID")){
+			currentSSID = generalFunctions.getValue(command, '#', 1);
+			Serial.println("Ok-currentSSID");
+			Serial.flush();
+			delay(delayTime);
+		}else if(command.startsWith("HostMode")  ){
+			Serial.println("Ok-HostMode");
+			Serial.flush();
+			delay(delayTime);
+			isHost=true;
+
+		}else if(command.startsWith("NetworkMode")   ){
+			Serial.println("Ok-NetworkMode");
+			Serial.flush();
+			delay(delayTime);
+			isHost=false;
+
+		}else if(command.startsWith("GetSensorData")){
+			Serial.println(toReturn);
+			Serial.flush();
+		}else if (command.startsWith("UpdateTeleonomeStatus")){
+			int id = generalFunctions.getValue(command, '#', 1).toInt();
+			String statusValue = generalFunctions.getValue(command, '#', 2);
+			String info = generalFunctions.getValue(command, '#', 3);
+			ledStatusLine2[id]=info;
+
+			if(statusValue=="success"){
+				leds.setColorRGB(id, 0, 255, 0);
+			}else  if(statusValue=="warning"){
+				leds.setColorRGB(id, 255, 255, 0);
+			}else  if(statusValue=="danger"){
+				leds.setColorRGB(id, 255, 0, 0);
+			}else  if(statusValue=="primary"){
+				leds.setColorRGB(id, 0, 0, 255);
+			}else  if(statusValue=="crisis"){
+				leds.setColorRGB(id, 255, 165, 0);
+			}else  if(statusValue=="off"){
+				leds.setColorRGB(id, 0, 0, 0);
+			}else  if(statusValue=="stale"){
+				leds.setColorRGB(id, 148, 0, 211);
+			}
+			Serial.println("UpdateTeleonomeStatus");
+			Serial.flush();
+			delay(delayTime);
+		}else if(command.startsWith("EnterWPS")){
+			//EnterWPS#10#45#30#1
+			secondsToTurnPowerOff = (long)generalFunctions.getValue(command, '#', 1).toInt();
+			secondsToNextPiOn = (long)generalFunctions.getValue(command, '#', 2).toInt();
+			wpsPulseFrequencySeconds = generalFunctions.getValue(command, '#', 3).toInt();
+			int pauseDuringWPSi = generalFunctions.getValue(command, '#', 4).toInt();
+			if(pauseDuringWPSi==1)pauseDuringWPS=true;
+			else pauseDuringWPS=false;
+			waitingForWPSConfirmation=false;
+			wpsCountdown=true;
+			operatingStatus="WPS";
+			wpsCountDownStartSeconds= getCurrentTimeInSeconds();
+			currentSecondsToPowerOff=0L;
+
+			Serial.println("Ok-EnterWPS");
+			Serial.flush();
+		}else if(command.startsWith("ExitWPS")){
+
+			Serial.println("Ok-ExitWPS");
+			Serial.flush();
+			inWPS=false;
+			operatingStatus="Normal";
+			currentSecondsToPowerOff=0L;
+			wpsCountdown=false;
+
+		}else if(command.startsWith("UpdateWPSParameters")){
+			String minWPSVoltageS = generalFunctions.getValue(command, '#', 1);
+			char buffer[10];
+			minWPSVoltageS.toCharArray(buffer, 10);
+			minWPSVoltage = atof(buffer);
+
+			minWPSVoltage = generalFunctions.stringToFloat(generalFunctions.getValue(command, '#', 1));
+			enterWPSVoltage = generalFunctions.stringToFloat(generalFunctions.getValue(command, '#', 2));
+			exitWPSVoltage = generalFunctions.stringToFloat(generalFunctions.getValue(command, '#', 3));
+
+			secondsToForcedWPS = generalFunctions.getValue(command, '#', 4).toInt();
+			Serial.println("Ok-UpdateWPSParameters");
+			Serial.flush();
+
+
+
+		}else if(command.startsWith("GetRememberedValueData")){
+			//GetRememberedValueData#0
+			int transferData = generalFunctions.getValue(command, '#', 1).toInt();
+			boolean result = sdCardManager.readUntransferredFileFromSDCard( transferData,true, RememberedValueDataDirName);
+			if(result){
+				Serial.println("Ok-GetRememberedValueData");
+			}else {
+				char text[44];
+				snprintf(text, sizeof text, "Failure-error opening %s/%s", remFileName, unstraferedFileName);
+				Serial.println(text);
+			}
+			Serial.flush();
+		}else if(command.startsWith("GetLifeCycleData")){
+			//GetLifeCycleData#0
+			int transferData = generalFunctions.getValue(command, '#', 1).toInt();
+			boolean result = sdCardManager.readUntransferredFileFromSDCard( transferData,true, LifeCycleDataDirName);
+			if(result){
+				Serial.println("Ok-GetLifeCycleData");
+			}else {
+				char text[44];
+				snprintf(text, sizeof text, "Failure-error opening %s/%s", LifeCycleDataDirName, unstraferedFileName);
+				Serial.println(text);
+			}
+			Serial.flush();
+		}else if(command.startsWith("GetWPSSensorData")){
+			//GetWPSSensorData#0
+			//GetLifeCycleData#0
+			int transferData = generalFunctions.getValue(command, '#', 1).toInt();
+			boolean result = sdCardManager.readUntransferredFileFromSDCard( transferData,true, WPSSensorDataDirName);
+			if(result){
+				Serial.println("Ok-GetWPSSensorData");
+			}else {
+
+				char text[44];
+				snprintf(text, sizeof text, "Failure-error opening /%s/%s", WPSSensorDataDirName, unstraferedFileName);
+				Serial.println(text);
+
+			}
+			Serial.flush();
+
+		}else if(command.startsWith("GetHistoricalWPSSensorData")){
+
+			int date = generalFunctions.getValue(command, '#', 1).toInt();
+			int month = generalFunctions.getValue(command, '#', 2).toInt();
+			int year = generalFunctions.getValue(command, '#', 3).toInt();
+			boolean result  = sdCardManager.getHistoricalData( WPSSensorDataDirName,  date,  month,  year);
+			if(result){
+				Serial.println("Ok-GetWPSSensorDataHistory");
+			}else {
+				char text[44];
+				snprintf(text, sizeof text, "Failure-error opening %s/%s", WPSSensorDataDirName, unstraferedFileName);
+
+				Serial.println(text);
+			}
+			Serial.flush();
+		}else if(command.startsWith("GetHistoricalLifeCycleData")){
+			//GetHistoricalLifeCycleData#12#1#19
+			int date = generalFunctions.getValue(command, '#', 1).toInt();
+			int month = generalFunctions.getValue(command, '#', 2).toInt();
+			int year = generalFunctions.getValue(command, '#', 3).toInt();
+			boolean result  = sdCardManager.getHistoricalData( LifeCycleDataDirName,  date,  month,  year);
+			if (result) {
+				Serial.println("Ok-GetHistoricalLifeCycleData");
+			}else {
+				char text[44];
+				snprintf(text, sizeof text, "Failure-error opening %s/%s", LifeCycleDataDirName, unstraferedFileName);
+				Serial.println(text);
+			}
+			Serial.flush();
+		}else if(command.startsWith("GetHistoricalRememberedValueData")){
+			//GetHistoricalLifeCycleData#12#1#19
+			int date = generalFunctions.getValue(command, '#', 1).toInt();
+			int month = generalFunctions.getValue(command, '#', 2).toInt();
+			int year = generalFunctions.getValue(command, '#', 3).toInt();
+			boolean result  = sdCardManager.getHistoricalData( RememberedValueDataDirName,  date,  month,  year);
+			if (result) {
+				Serial.println("Ok-GetHistoricalRememberedValueData");
+			}else {
+				char text[44];
+				snprintf(text, sizeof text, "Failure-error opening %s/%s", RememberedValueDataDirName, unstraferedFileName);
+
+				Serial.println(text);
+			}
+			Serial.flush();
+		}else if (command == "AsyncData" ){
+			Serial.println("Ok-No Data");
+			Serial.flush();
+		}else if (command.startsWith("FaultData") ){
+			//Serial.println(faultData);
+			if(faultData=="Enter WPS"){
+
+				Serial.print("Fault#WPS Alert#Enter WPS#");
+				Serial.print(secretManager.generateCode());
+
+				Serial.print("#@On Load:Notify And Shutdown:Voltage At WPS#");
+				Serial.println(batteryVoltage);
+				waitingForWPSConfirmation=true;
+
+			}else{
+				Serial.println("Ok");
+			}
+
+			Serial.flush();
+			faultData="";
+			delay(delayTime);
+		}else if (command.startsWith("UserCommand") ){
+			//
+			// this function is not used in Ra2
+			// because Ra2 has no buttons
+			// but in the case that a teleonome does have
+			//human interface buttons connected to the microcontrller
+			// or there is a timer, here is where it will
+			Serial.println("Ok-UserCommand");
+			Serial.flush();
+			delay(delayTime);
+
+		}else if (command.startsWith("TimerStatus") ){
+			//
+			// this function is not used in Ra2
+			// because Ra2 has no btimers
+			// but in the case that a teleonome does have
+			//human interface buttons connected to the microcontrller
+			// or there is a timer, here is where it will be
+			Serial.println("Ok-TimerStatus");
+			Serial.flush();
+			delay(delayTime);
+
+		}else{
+			//
+			// call read to flush the incoming
+			//
+			Serial.read();
+			Serial.println("Failure-Bad Command " + command);
+			Serial.flush();
+		}
+	}
 }

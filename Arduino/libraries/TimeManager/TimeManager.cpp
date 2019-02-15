@@ -5,8 +5,9 @@
  *      Author: arifainchtein
  */
 #include "Arduino.h"
-#include <TimeManager.h>
+#include <>TimeManager.h>
 #include <RTClib.h>
+#include <GeneralFunctions.h>
 
 #define LEAP_YEAR(_year) ((_year%4)==0)
 RTC_DS1307 RTC;
@@ -16,7 +17,51 @@ int timeZoneHours=11;
 int SECONDOFFSET=10;
 static  byte monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
 
-TimeManager::TimeManager(){
+TimeManager::TimeManager(GeneralFunctions& g, HardwareSerial& serial):generalFunctions(g),  _HardSerial(serial){
+}
+
+//
+// Functions that represents commands received via the serial port
+//
+
+
+boolean TimeManager::setTime(String command){
+	int date = generalFunctions.getValue(command, '#', 1).toInt();
+	int month = generalFunctions.getValue(command, '#', 2).toInt();
+	int year = generalFunctions.getValue(command, '#', 3).toInt();
+	int dw = generalFunctions.getValue(command, '#', 4).toInt();
+	int hour = generalFunctions.getValue(command, '#', 5).toInt();
+	int min = generalFunctions.getValue(command, '#', 6).toInt();
+	int sec = generalFunctions.getValue(command, '#', 7).toInt();
+	getTime();
+	return true;
+
+}
+
+boolean TimeManager::getTime(){
+
+	DateTime now = RTC.now();
+	_HardSerial.print(now.day());
+	_HardSerial.print("/");//month
+	_HardSerial.print(now.month());
+	_HardSerial.print("/");//month
+	_HardSerial.print(now.year());
+	_HardSerial.print(" ");//month
+	_HardSerial.print(now.hour());
+	_HardSerial.print(":");
+	_HardSerial.print(now.minute());
+	_HardSerial.print(":");
+	_HardSerial.println(now.second());
+	_HardSerial.println("Ok-GetTime");
+	_HardSerial.flush();
+	return true;
+}
+//
+// End of Functions that represents commands received via the serial port
+//
+
+
+void TimeManager::start(){
 	RTC.begin();
 	//check or the Real Time Clock is on
 	if (! RTC.isrunning()) {
@@ -26,6 +71,8 @@ TimeManager::TimeManager(){
 		RTC.adjust(DateTime(__DATE__, __TIME__));
 	}
 }
+
+
 
 long TimeManager::dateAsSeconds(uint8_t year, uint8_t month, uint8_t date, uint8_t hour, uint8_t minute, uint8_t second){
 

@@ -13,9 +13,12 @@
 #include <TimeManager.h>
 
 class SDCardManager{
+	TimeManager & timeManager;
+	GeneralFunctions & generalFunctions;
+	HardwareSerial& _HardSerial;
 
 public:
-	SDCardManager(TimeManager t, GeneralFunctions f);
+	SDCardManager(TimeManager & t, GeneralFunctions  & f, HardwareSerial& serial);
 	boolean readUntransferredFileFromSDCardByDate(int moveData, boolean sendToSerial,const char *dirName, int date, int month, int year);
 	boolean readUntransferredFileFromSDCard(int moveData, boolean sendToSerial, const char *dirName);
 	void storeRememberedValue(long time, const char *name, float value, String unit);
@@ -26,12 +29,16 @@ public:
 	long getSDCardDiskUse(File dir );
 	boolean getHistoricalData(const char *dirName, int date, int month, int year);
 	void saveWPSSensorRecord(WPSSensorRecord anWPSSensorRecord);
-
+	//
+	// Functions that represent Serial commands
+	//
+	boolean testWPSSensor(float batteryVoltage, float current, int stateOfCharge, String operatingStatus);
+	float listFiles();
+	boolean setTime(String);
 
 private:
 	File dataFile;
-	GeneralFunctions generalFunctions;
-	TimeManager timeManager;
+
 };
 
 #endif
