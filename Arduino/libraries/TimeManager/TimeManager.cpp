@@ -77,7 +77,7 @@ if(year>1999)year=year-2000;
 
 }
 
-boolean TimeManager::getTime(){
+boolean TimeManager::printTimeToSerial(){
 
 	DateTime now = RTC.now();
 	_HardSerial.print(now.day());
@@ -151,6 +151,25 @@ long TimeManager::dateAsSeconds(uint8_t year, uint8_t month, uint8_t date, uint8
 
 	return seconds;
 }
+
+String TimeManager::getCurrentTimeForDisplay(){
+	DateTime now = RTC.now();
+	String displayTime =  now.hour()+":"+now.minute()":"+now.second();
+	return displayTime;
+}
+
+String TimeManager::getCurrentDateTimeForDisplay(){
+	DateTime now = RTC.now();
+	String displayTime = now.day()+"/"+now.month()+"/"+now.year()+ " " +now.hour()+":"+now.minute()":"+now.second();
+	return displayTime;
+}
+
+String TimeManager::getCurrentDateForDisplay(){
+	DateTime now = RTC.now();
+	String displayTime = now.day()+"/"+now.month()+"/"+now.year();
+	return displayTime;
+}
+
 
 long TimeManager::getTimeForCodeGeneration(){
 

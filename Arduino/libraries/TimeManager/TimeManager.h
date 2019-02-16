@@ -27,10 +27,13 @@ class TimeManager{
 		String getElapsedTimeHoursMinutesSecondsString(long elapsedTime);
 		DateTime getCurrentDateTime();
 		long getTimeForCodeGeneration();
+		String getCurrentTimeForDisplay();
+		String getCurrentDateTimeForDisplay();
+		String getCurrentDateForDisplay();
 		//
 		// Functions that represent Serial commands
 		//
-		boolean getTime();
+		boolean printTimeToSerial();
 		boolean setTime(String);
 
 	private:

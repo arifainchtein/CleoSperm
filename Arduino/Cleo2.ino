@@ -608,6 +608,8 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 					lcd.print("V ") ;
 					lcd.print(internalBatteryStateOfCharge);
 					lcd.print("%") ;
+					lcd.setCursor(0, 1);
+					lcd.print(timeManager.getCurrentTimeForDisplay());
 				}else{
 					lcd.clear();
 					lcd.setCursor(0, 0);
