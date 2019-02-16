@@ -1109,8 +1109,8 @@ void loop() {
 	float batteryVoltage = getBatteryVoltage();
 	int internalBatteryStateOfCharge = generalFunctions.getStateOfCharge(batteryVoltage);
 	float currentValue = calculateCurrent();
-	long  lockCapacitorValue=analogRead(LOCK_CAPACITOR_PIN);
-	capacitorVoltage= lockCapacitorValue * (5.0 / 1023.0);
+	//long  lockCapacitorValue=analogRead(LOCK_CAPACITOR_PIN);
+	capacitorVoltage= 5.0;//lockCapacitorValue * (5.0 / 1023.0);
 	boolean piIsOn = digitalRead(PI_POWER_PIN);
 	ambientTemperature = dht.readTemperature();
 	ambientHumidity = dht.readHumidity();
@@ -1314,14 +1314,23 @@ void loop() {
 			Serial.flush();
 
 		}else if(command.startsWith("SetTime")){
-			boolean result = timeManager.setTime(command);
-			if(result){
-				Serial.println("Ok-SetTime");
-			}else{
+
+			if(capacitorVoltage==0){
+				//
+				// we are in normal operation
+				//
 				Serial.println("Failure-SetTime");
+				Serial.flush();
+			}else{
+				boolean result = timeManager.setTime(command);
+				if(result){
+					Serial.println("Ok-SetTime");
+				}else{
+					Serial.println("Failure-SetTime");
+				}
+				Serial.println("Ok-SetTime");
+				Serial.flush();
 			}
-			Serial.println("Ok-SetTime");
-			Serial.flush();
 
 		}else if(command.startsWith("GetTime")){
 			boolean result = timeManager.getTime();
