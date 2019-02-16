@@ -40,5 +40,6 @@ class TimeManager{
 		int chipSelect = 10;
 		int timeZoneHours=11;
 		int SECONDOFFSET=10;
+		byte TimeManager::decToBcd(byte val);
 	};
 #endif /* TIMEMANAGER_H_ */

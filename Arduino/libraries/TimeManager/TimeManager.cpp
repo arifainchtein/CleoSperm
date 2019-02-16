@@ -6,6 +6,7 @@
  */
 #include "Arduino.h"
 #include <TimeManager.h>
+#include <Wire.h>
 #include <RTClib.h>
 #include <GeneralFunctions.h>
 
@@ -16,8 +17,11 @@ const int chipSelect = 10; //cs or the save select pin from the sd shield is con
 int timeZoneHours=11;
 int SECONDOFFSET=10;
 static  byte monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
+#define DS1307_ADDRESS 0x68
+byte zero = 0x00;
 
 TimeManager::TimeManager(GeneralFunctions& g, HardwareSerial& serial):generalFunctions(g),  _HardSerial(serial){
+	Wire.begin();
 }
 
 //
@@ -25,14 +29,49 @@ TimeManager::TimeManager(GeneralFunctions& g, HardwareSerial& serial):generalFun
 //
 
 
+
+byte TimeManager::decToBcd(byte val){
+// Convert normal decimal numbers to binary coded decimal
+  return ( (val/10*16) + (val%10) );
+}
+
+
 boolean TimeManager::setTime(String command){
 	int date = generalFunctions.getValue(command, '#', 1).toInt();
 	int month = generalFunctions.getValue(command, '#', 2).toInt();
 	int year = generalFunctions.getValue(command, '#', 3).toInt();
-	int dw = generalFunctions.getValue(command, '#', 4).toInt();
+	int weekDay = generalFunctions.getValue(command, '#', 4).toInt();
 	int hour = generalFunctions.getValue(command, '#', 5).toInt();
 	int min = generalFunctions.getValue(command, '#', 6).toInt();
 	int sec = generalFunctions.getValue(command, '#', 7).toInt();
+if(year>1999)year=year-2000;
+//	  byte second =      00; //0-59
+//	  byte minute =      19; //0-59
+//	  byte hour =        21; //0-23
+//	  byte weekDay =     4; //1-7
+//	  byte monthDay =    27; //1-31
+//	  byte month =       10; //1-12
+//	  byte year  =       12; //0-99
+
+	  Wire.beginTransmission(DS1307_ADDRESS);
+	  Wire.write(zero); //stop Oscillator
+
+	  Wire.write(decToBcd(sec));
+	  Wire.write(decToBcd(min));
+	  Wire.write(decToBcd(hour));
+	  Wire.write(decToBcd(weekDay));
+	  Wire.write(decToBcd(date));
+	  Wire.write(decToBcd(month));
+	  Wire.write(decToBcd(year));
+
+	  Wire.write(zero); //start
+
+	  Wire.endTransmission();
+
+	}
+
+//	setTime(hour,min,sec,date,month,year);
+//	RTC.set(now());
 	getTime();
 	return true;
 
