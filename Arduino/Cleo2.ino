@@ -223,9 +223,10 @@ char lifeCycleFileName[10];
 char remFileName[10];
 int SECONDOFFSET=10;
 
-TimeManager timeManager;
-SecretManager secretManager(timeManager);
 GeneralFunctions generalFunctions;
+TimeManager timeManager(generalFunctions, Serial);
+SecretManager secretManager(timeManager);
+
 SDCardManager sdCardManager(timeManager, generalFunctions, Serial);
 
 
@@ -1249,12 +1250,16 @@ void loop() {
 	//
 	// Sensor Request Queue Position 16
 	//
-	toReturn.concat(ambientTemperature);
+	char ambientTemperatureStr[15];
+	dtostrf(ambientTemperature,4, 0, ambientTemperatureStr);
+	toReturn.concat(ambientTemperatureStr);
 	toReturn.concat("#");
 	//
 	// Sensor Request Queue Position 17
 	//
-	toReturn.concat(ambientHumidity);
+	char ambientHumidityStr[15];
+	dtostrf(ambientHumidity,4, 0, ambientHumidityStr);
+	toReturn.concat(ambientHumidityStr);
 	toReturn.concat("#");
 
 	//lcd.clear();
