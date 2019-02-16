@@ -37,6 +37,7 @@ byte TimeManager::decToBcd(byte val){
 
 
 boolean TimeManager::setTime(String command){
+	RTC.begin();
 	int date = generalFunctions.getValue(command, '#', 1).toInt();
 	int month = generalFunctions.getValue(command, '#', 2).toInt();
 	int year = generalFunctions.getValue(command, '#', 3).toInt();
@@ -45,6 +46,9 @@ boolean TimeManager::setTime(String command){
 	int min = generalFunctions.getValue(command, '#', 6).toInt();
 	int sec = generalFunctions.getValue(command, '#', 7).toInt();
 	if(year>1999)year=year-2000;
+	_HardSerial.print("setting hour to:");
+	_HardSerial.println(hour);
+
 	//	  byte second =      00; //0-59
 	//	  byte minute =      19; //0-59
 	//	  byte hour =        21; //0-23
@@ -104,12 +108,13 @@ void TimeManager::start(){
 	RTC.begin();
 	//check or the Real Time Clock is on
 	if (! RTC.isrunning()) {
-		Serial.println("RTC is NOT running!");
+		_HardSerial.println("RTC is NOT running!");
 		// following line sets the RTC to the date & time this sketch was compiled
 		// uncomment it & upload to set the time, date and start run the RTC!
 		RTC.adjust(DateTime(__DATE__, __TIME__));
-		Serial.println("Current time:");
+		_HardSerial.println("Current time:");
 		printTimeToSerial();
+
 	}
 
 }
