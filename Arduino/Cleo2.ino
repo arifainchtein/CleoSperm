@@ -221,7 +221,6 @@ const char  *unstraferedFileName ="Untransf.txt";
 char sensorDirName[10];
 char lifeCycleFileName[10];
 char remFileName[10];
-int SECONDOFFSET=10;
 
 GeneralFunctions generalFunctions;
 TimeManager timeManager(generalFunctions, Serial);
