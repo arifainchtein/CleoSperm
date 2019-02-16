@@ -32,9 +32,9 @@ extern const char  *unstraferedFileName;// ="Untransf.txt";
 extern char sensorDirName[10];
 extern char lifeCycleFileName[10];
 extern char remFileName[10];
-TimeManager & timeManager;
-	GeneralFunctions & generalFunctions;
-	HardwareSerial& _HardSerial;
+//TimeManager & timeManager;
+//	GeneralFunctions & generalFunctions;
+//	HardwareSerial& _HardSerial;
 
 SDCardManager::SDCardManager(TimeManager& t, GeneralFunctions& f,HardwareSerial& serial ): timeManager(t), generalFunctions(f), _HardSerial(serial)
 {
