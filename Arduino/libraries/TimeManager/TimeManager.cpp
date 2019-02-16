@@ -37,7 +37,6 @@ byte TimeManager::decToBcd(byte val){
 
 
 boolean TimeManager::setTime(String command){
-	RTC.begin();
 	int date = generalFunctions.getValue(command, '#', 1).toInt();
 	int month = generalFunctions.getValue(command, '#', 2).toInt();
 	int year = generalFunctions.getValue(command, '#', 3).toInt();
@@ -48,6 +47,7 @@ boolean TimeManager::setTime(String command){
 	if(year>1999)year=year-2000;
 	_HardSerial.print("setting hour to:");
 	_HardSerial.println(hour);
+	_HardSerial.flush();
 
 	//	  byte second =      00; //0-59
 	//	  byte minute =      19; //0-59
@@ -113,10 +113,12 @@ void TimeManager::start(){
 		// uncomment it & upload to set the time, date and start run the RTC!
 		RTC.adjust(DateTime(__DATE__, __TIME__));
 		_HardSerial.println("Current time:");
+		_HardSerial.flush();
 		printTimeToSerial();
 
 	}
-
+	_HardSerial.println("Finished start");
+	_HardSerial.flush();
 }
 
 
