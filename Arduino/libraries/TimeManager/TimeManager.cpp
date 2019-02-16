@@ -37,6 +37,14 @@ byte TimeManager::decToBcd(byte val){
 
 
 boolean TimeManager::setTime(String command){
+	if (! RTC.isrunning()) {
+			_HardSerial.println("in set time-RTC is NOT running!");
+			_HardSerial.flush();
+			// following line sets the RTC to the date & time this sketch was compiled
+			// uncomment it & upload to set the time, date and start run the RTC!
+			RTC.adjust(DateTime(__DATE__, __TIME__));
+			_HardSerial.println("RTC set");
+	}
 	int date = generalFunctions.getValue(command, '#', 1).toInt();
 	int month = generalFunctions.getValue(command, '#', 2).toInt();
 	int year = generalFunctions.getValue(command, '#', 3).toInt();
@@ -109,6 +117,7 @@ void TimeManager::start(){
 	//check or the Real Time Clock is on
 	if (! RTC.isrunning()) {
 		_HardSerial.println("RTC is NOT running!");
+		_HardSerial.flush();
 		// following line sets the RTC to the date & time this sketch was compiled
 		// uncomment it & upload to set the time, date and start run the RTC!
 		RTC.adjust(DateTime(__DATE__, __TIME__));
