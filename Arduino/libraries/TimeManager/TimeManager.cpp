@@ -31,8 +31,8 @@ TimeManager::TimeManager(GeneralFunctions& g, HardwareSerial& serial):generalFun
 
 
 byte TimeManager::decToBcd(byte val){
-// Convert normal decimal numbers to binary coded decimal
-  return ( (val/10*16) + (val%10) );
+	// Convert normal decimal numbers to binary coded decimal
+	return ( (val/10*16) + (val%10) );
 }
 
 
@@ -44,34 +44,34 @@ boolean TimeManager::setTime(String command){
 	int hour = generalFunctions.getValue(command, '#', 5).toInt();
 	int min = generalFunctions.getValue(command, '#', 6).toInt();
 	int sec = generalFunctions.getValue(command, '#', 7).toInt();
-if(year>1999)year=year-2000;
-//	  byte second =      00; //0-59
-//	  byte minute =      19; //0-59
-//	  byte hour =        21; //0-23
-//	  byte weekDay =     4; //1-7
-//	  byte monthDay =    27; //1-31
-//	  byte month =       10; //1-12
-//	  byte year  =       12; //0-99
+	if(year>1999)year=year-2000;
+	//	  byte second =      00; //0-59
+	//	  byte minute =      19; //0-59
+	//	  byte hour =        21; //0-23
+	//	  byte weekDay =     4; //1-7
+	//	  byte monthDay =    27; //1-31
+	//	  byte month =       10; //1-12
+	//	  byte year  =       12; //0-99
 
-	  Wire.beginTransmission(DS1307_ADDRESS);
-	  Wire.write(zero); //stop Oscillator
+	Wire.beginTransmission(DS1307_ADDRESS);
+	Wire.write(zero); //stop Oscillator
 
-	  Wire.write(decToBcd(sec));
-	  Wire.write(decToBcd(min));
-	  Wire.write(decToBcd(hour));
-	  Wire.write(decToBcd(weekDay));
-	  Wire.write(decToBcd(date));
-	  Wire.write(decToBcd(month));
-	  Wire.write(decToBcd(year));
+	Wire.write(decToBcd(sec));
+	Wire.write(decToBcd(min));
+	Wire.write(decToBcd(hour));
+	Wire.write(decToBcd(weekDay));
+	Wire.write(decToBcd(date));
+	Wire.write(decToBcd(month));
+	Wire.write(decToBcd(year));
 
-	  Wire.write(zero); //start
+	Wire.write(zero); //start
 
-	  Wire.endTransmission();
+	Wire.endTransmission();
 
 
 
-//	setTime(hour,min,sec,date,month,year);
-//	RTC.set(now());
+	//	setTime(hour,min,sec,date,month,year);
+	//	RTC.set(now());
 	//getTime();
 	return true;
 
@@ -154,19 +154,42 @@ long TimeManager::dateAsSeconds(uint8_t year, uint8_t month, uint8_t date, uint8
 
 String TimeManager::getCurrentTimeForDisplay(){
 	DateTime now = RTC.now();
-	String displayTime =  now.hour()+":"+now.minute() + ":"+now.second();
+	String displayTime =  "";
+	displayTime.concat(now.hour());
+	displayTime.concat(":");
+	displayTime.concat(now.minute());
+	displayTime.concat(":");
+	displayTime.concat(now.second());
 	return displayTime;
 }
 
 String TimeManager::getCurrentDateTimeForDisplay(){
 	DateTime now = RTC.now();
-	String displayTime = now.day()+"/"+now.month()+"/"+now.year()+ " " +now.hour()+":"+now.minute() + ":"+now.second();
+	String displayTime =  "";
+	displayTime.concat(now.day());
+	displayTime.concat("/");
+	displayTime.concat(now.month());
+	displayTime.concat("/");
+	displayTime.concat(now.year());
+	displayTime.concat(" ");
+	displayTime.concat(now.hour());
+	displayTime.concat(":");
+	displayTime.concat(now.minute());
+	displayTime.concat(":");
+	displayTime.concat(now.second());
+
 	return displayTime;
 }
 
 String TimeManager::getCurrentDateForDisplay(){
 	DateTime now = RTC.now();
-	String displayTime = now.day()+"/"+now.month()+"/"+now.year();
+	String displayTime =  "";
+	displayTime.concat(now.day());
+	displayTime.concat("/");
+	displayTime.concat(now.month());
+	displayTime.concat("/");
+	displayTime.concat(now.year());
+
 	return displayTime;
 }
 
