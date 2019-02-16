@@ -38,8 +38,6 @@ TimeManager & timeManager;
 
 SDCardManager::SDCardManager(TimeManager& t, GeneralFunctions& f,HardwareSerial& serial ): timeManager(t), generalFunctions(f), _HardSerial(serial)
 {
-	generalFunctions=f;
-	timeManager=t;
 	//setup SD card
 	_HardSerial.print("Initializing SD card...");
 
