@@ -157,7 +157,7 @@ boolean SDCardManager::readUntransferredFileFromSDCard(int moveData, boolean sen
 }
 
 
-boolean readUntransferredFileFromSDCardByDate(int moveData, boolean sendToSerial,const char *dirName, int date, int month, int year){
+boolean SDCardManager::readUntransferredFileFromSDCardByDate(int moveData, boolean sendToSerial,const char *dirName, int date, int month, int year){
 	//GetRememberedValueData#0
 
 	char fileName[25] = "/";
