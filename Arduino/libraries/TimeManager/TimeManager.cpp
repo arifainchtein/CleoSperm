@@ -68,11 +68,11 @@ if(year>1999)year=year-2000;
 
 	  Wire.endTransmission();
 
-	}
+
 
 //	setTime(hour,min,sec,date,month,year);
 //	RTC.set(now());
-	getTime();
+	//getTime();
 	return true;
 
 }
