@@ -224,7 +224,7 @@ char remFileName[10];
 
 GeneralFunctions generalFunctions;
 TimeManager timeManager(generalFunctions, Serial);
-//SecretManager secretManager(timeManager);
+SecretManager secretManager(timeManager);
 //SDCardManager sdCardManager(timeManager, generalFunctions, Serial);
 
 
