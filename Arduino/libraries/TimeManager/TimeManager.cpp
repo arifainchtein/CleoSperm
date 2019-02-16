@@ -69,7 +69,10 @@ void TimeManager::start(){
 		// following line sets the RTC to the date & time this sketch was compiled
 		// uncomment it & upload to set the time, date and start run the RTC!
 		RTC.adjust(DateTime(__DATE__, __TIME__));
+		Serial.println("Current time:");
+		getTime();
 	}
+
 }
 
 
