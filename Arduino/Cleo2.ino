@@ -1335,7 +1335,7 @@ void loop() {
 			}
 
 		}else if(command.startsWith("GetTime")){
-			boolean result = timeManager.getTime();
+			boolean result = timeManager.printTimeToSerial();
 			if(result){
 				Serial.println("Ok-GetTime");
 			}else{
