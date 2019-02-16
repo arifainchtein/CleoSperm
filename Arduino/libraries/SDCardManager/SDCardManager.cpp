@@ -157,43 +157,7 @@ boolean SDCardManager::readUntransferredFileFromSDCard(int moveData, boolean sen
 }
 
 
-boolean SDCardManager::readUntransferredFileFromSDCardByDate(int moveData, boolean sendToSerial,const char *dirName, int date, int month, int year){
-	//GetRememberedValueData#0
 
-	char fileName[25] = "/";
-	snprintf(fileName, sizeof fileName, "/%s/%s", dirName, unstraferedFileName);
-
-	File uf = SD.open(fileName, FILE_WRITE);
-	File tf;
-	boolean result=false;
-	if(moveData==1){
-		char fileNameTF[24];
-		snprintf(fileNameTF, sizeof fileName, "/%s/%i_%i_%i.txt", dirName, date,month, year);
-		tf = SD.open(fileNameTF, FILE_WRITE);
-	}
-
-	if (uf) {
-		uf.seek(0);
-		while (uf.available()){
-			//
-			// Read each line, send it to the serial port
-			// and copy it into today's file
-			String line = uf.readStringUntil('\n');
-			if(sendToSerial)_HardSerial.print(line);
-			if(moveData==1)tf.print(line);
-		}
-		uf.close(); // close the file
-		if(moveData==1){
-			tf.close(); // close the file
-			//
-			// since we just transferred the records and copy them
-			// delete the file untransferredFile
-			SD.remove(fileName);
-		}
-		result=true;
-	}
-	return result;
-}
 void SDCardManager::storeRememberedValue(long time, const char *name, float value, String unit){
 	//File untransferredFile = SD.open("/" + RememberedValueDataDirName + "/" + unstraferedFileName, FILE_WRITE);
 
