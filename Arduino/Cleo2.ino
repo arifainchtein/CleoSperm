@@ -225,7 +225,7 @@ char remFileName[10];
 GeneralFunctions generalFunctions;
 TimeManager timeManager(generalFunctions, Serial);
 SecretManager secretManager(timeManager);
-//SDCardManager sdCardManager(timeManager, generalFunctions, Serial);
+SDCardManager sdCardManager(timeManager, generalFunctions, Serial);
 
 
 void hourlyTasks(long time, int previousHour ){
