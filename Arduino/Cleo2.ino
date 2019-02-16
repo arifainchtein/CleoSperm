@@ -1003,8 +1003,8 @@ void setup() {
 	lcd.print("initializing" );
 	leds.setColorRGB(0, 255, 255, 0);
 	leds.setColorRGB(1, 255, 0, 0);
-	leds.setColorRGB(2, 0, 0, 255);
-	leds.setColorRGB(3, 0, 255, 0);
+	leds.setColorRGB(2, 255, 0, 255);
+	leds.setColorRGB(3, 255, 255, 0);
 
 	pinMode(selectPin, INPUT);
 	pinMode(actionPin, INPUT);
