@@ -11,8 +11,8 @@
 
 class SecretManager{
 		TimeManager & timeManager;
-		extern int SHARED_SECRET_LENGTH;
-		extern int SECONDOFFSET;
+		 int SHARED_SECRET_LENGTH;
+		 int SECONDOFFSET;
 
 
 	public:
