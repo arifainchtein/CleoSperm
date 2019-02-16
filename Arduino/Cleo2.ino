@@ -1335,7 +1335,7 @@ void loop() {
 		}else if(command.startsWith("VerifyUserCode")){
 			String codeInString = generalFunctions.getValue(command, '#', 1);
 			long userCode = codeInString.toInt();
-			boolean validCode = true;// secretManager.checkCode( userCode);
+			boolean validCode = secretManager.checkCode( userCode);
 			String result="Failure-Invalid Code";
 			if(validCode)result="Ok-Valid Code";
 			Serial.println(result);
@@ -1343,7 +1343,7 @@ void loop() {
 			delay(delayTime);
 		}else if(command.startsWith("GetCommandCode")){
 
-			long code =123456;//secretManager.generateCode();
+			long code =secretManager.generateCode();
 			//
 			// patch a bug in the totp library
 			// if the first digit is a zero, it
@@ -1365,7 +1365,7 @@ void loop() {
 				Serial.flush();
 			}else{
 				char secretCode[SHARED_SECRET_LENGTH];
-				//secretManager.readSecret(secretCode);
+				secretManager.readSecret(secretCode);
 				Serial.println(secretCode);
 				Serial.println("Ok-GetSecret");
 				Serial.flush();
@@ -1384,7 +1384,7 @@ void loop() {
 				String secret = generalFunctions.getValue(command, '#', 1);
 				int numberDigits = generalFunctions.getValue(command, '#', 2).toInt();
 				int periodSeconds = generalFunctions.getValue(command, '#', 3).toInt();
-				//secretManager.saveSecret(secret, numberDigits, periodSeconds);
+				secretManager.saveSecret(secret, numberDigits, periodSeconds);
 
 				Serial.println("Ok-SetSecret");
 				Serial.flush();
@@ -1590,7 +1590,7 @@ void loop() {
 			if(faultData=="Enter WPS"){
 
 				Serial.print("Fault#WPS Alert#Enter WPS#");
-				//Serial.print(secretManager.generateCode());
+				Serial.print(secretManager.generateCode());
 
 				Serial.print("#@On Load:Notify And Shutdown:Voltage At WPS#");
 				Serial.println(batteryVoltage);
