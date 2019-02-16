@@ -17,7 +17,7 @@ const int chipSelect = 10; //cs or the save select pin from the sd shield is con
 int timeZoneHours=11;
 int SECONDOFFSET=10;
 static  byte monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
-#define DS1307_ADDRESS 0x68
+#define DS1307_ADDRESS 0x62
 byte zero = 0x00;
 
 TimeManager::TimeManager(GeneralFunctions& g, HardwareSerial& serial):generalFunctions(g),  _HardSerial(serial){
