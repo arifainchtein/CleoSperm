@@ -224,9 +224,8 @@ char remFileName[10];
 
 GeneralFunctions generalFunctions;
 TimeManager timeManager(generalFunctions, Serial);
-SecretManager secretManager(timeManager);
-
-SDCardManager sdCardManager(timeManager, generalFunctions, Serial);
+//SecretManager secretManager(timeManager);
+//SDCardManager sdCardManager(timeManager, generalFunctions, Serial);
 
 
 void hourlyTasks(long time, int previousHour ){
@@ -1237,7 +1236,7 @@ void loop() {
 	// Sensor Request Queue Position 14
 	//
 
-	long totalDiskUse=sdCardManager.getDiskUsage();
+	long totalDiskUse=0;//sdCardManager.getDiskUsage();
 	toReturn.concat(totalDiskUse/1024);
 	toReturn.concat("#");
 	//
@@ -1280,7 +1279,7 @@ void loop() {
 			float batteryVoltage = getBatteryVoltage();
 			float current = calculateCurrent();
 			int stateOfCharge= generalFunctions.getStateOfCharge(batteryVoltage);
-			boolean result = sdCardManager.testWPSSensor( batteryVoltage,  current,  stateOfCharge,  operatingStatus);
+			boolean result = true;//sdCardManager.testWPSSensor( batteryVoltage,  current,  stateOfCharge,  operatingStatus);
 			if(result){
 				Serial.println("Ok-TestWPSSensor");
 			}else{
@@ -1290,7 +1289,7 @@ void loop() {
 
 		}else if(command=="TestLifeCycle"){
 			long now = getCurrentTimeInSeconds();
-			sdCardManager.storeLifeCycleEvent(now, LIFE_CYCLE_EVENT_END_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
+			//sdCardManager.storeLifeCycleEvent(now, LIFE_CYCLE_EVENT_END_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
 			Serial.println("Ok-TestLifeCycle");
 			Serial.flush();
 
@@ -1336,7 +1335,7 @@ void loop() {
 		}else if(command.startsWith("VerifyUserCode")){
 			String codeInString = generalFunctions.getValue(command, '#', 1);
 			long userCode = codeInString.toInt();
-			boolean validCode = secretManager.checkCode( userCode);
+			boolean validCode = true;// secretManager.checkCode( userCode);
 			String result="Failure-Invalid Code";
 			if(validCode)result="Ok-Valid Code";
 			Serial.println(result);
@@ -1344,7 +1343,7 @@ void loop() {
 			delay(delayTime);
 		}else if(command.startsWith("GetCommandCode")){
 
-			long code =secretManager.generateCode();
+			long code =123456;//secretManager.generateCode();
 			//
 			// patch a bug in the totp library
 			// if the first digit is a zero, it
@@ -1366,7 +1365,7 @@ void loop() {
 				Serial.flush();
 			}else{
 				char secretCode[SHARED_SECRET_LENGTH];
-				secretManager.readSecret(secretCode);
+				//secretManager.readSecret(secretCode);
 				Serial.println(secretCode);
 				Serial.println("Ok-GetSecret");
 				Serial.flush();
@@ -1385,7 +1384,7 @@ void loop() {
 				String secret = generalFunctions.getValue(command, '#', 1);
 				int numberDigits = generalFunctions.getValue(command, '#', 2).toInt();
 				int periodSeconds = generalFunctions.getValue(command, '#', 3).toInt();
-				secretManager.saveSecret(secret, numberDigits, periodSeconds);
+				//secretManager.saveSecret(secret, numberDigits, periodSeconds);
 
 				Serial.println("Ok-SetSecret");
 				Serial.flush();
@@ -1502,7 +1501,7 @@ void loop() {
 		}else if(command.startsWith("GetRememberedValueData")){
 			//GetRememberedValueData#0
 			int transferData = generalFunctions.getValue(command, '#', 1).toInt();
-			boolean result = sdCardManager.readUntransferredFileFromSDCard( transferData,true, RememberedValueDataDirName);
+			boolean result = true;//sdCardManager.readUntransferredFileFromSDCard( transferData,true, RememberedValueDataDirName);
 			if(result){
 				Serial.println("Ok-GetRememberedValueData");
 			}else {
@@ -1514,7 +1513,7 @@ void loop() {
 		}else if(command.startsWith("GetLifeCycleData")){
 			//GetLifeCycleData#0
 			int transferData = generalFunctions.getValue(command, '#', 1).toInt();
-			boolean result = sdCardManager.readUntransferredFileFromSDCard( transferData,true, LifeCycleDataDirName);
+			boolean result = true;//sdCardManager.readUntransferredFileFromSDCard( transferData,true, LifeCycleDataDirName);
 			if(result){
 				Serial.println("Ok-GetLifeCycleData");
 			}else {
@@ -1527,7 +1526,7 @@ void loop() {
 			//GetWPSSensorData#0
 			//GetLifeCycleData#0
 			int transferData = generalFunctions.getValue(command, '#', 1).toInt();
-			boolean result = sdCardManager.readUntransferredFileFromSDCard( transferData,true, WPSSensorDataDirName);
+			boolean result = true;//sdCardManager.readUntransferredFileFromSDCard( transferData,true, WPSSensorDataDirName);
 			if(result){
 				Serial.println("Ok-GetWPSSensorData");
 			}else {
@@ -1544,7 +1543,7 @@ void loop() {
 			int date = generalFunctions.getValue(command, '#', 1).toInt();
 			int month = generalFunctions.getValue(command, '#', 2).toInt();
 			int year = generalFunctions.getValue(command, '#', 3).toInt();
-			boolean result  = sdCardManager.getHistoricalData( WPSSensorDataDirName,  date,  month,  year);
+			boolean result  = true;//sdCardManager.getHistoricalData( WPSSensorDataDirName,  date,  month,  year);
 			if(result){
 				Serial.println("Ok-GetWPSSensorDataHistory");
 			}else {
@@ -1559,7 +1558,7 @@ void loop() {
 			int date = generalFunctions.getValue(command, '#', 1).toInt();
 			int month = generalFunctions.getValue(command, '#', 2).toInt();
 			int year = generalFunctions.getValue(command, '#', 3).toInt();
-			boolean result  = sdCardManager.getHistoricalData( LifeCycleDataDirName,  date,  month,  year);
+			boolean result  = true;//sdCardManager.getHistoricalData( LifeCycleDataDirName,  date,  month,  year);
 			if (result) {
 				Serial.println("Ok-GetHistoricalLifeCycleData");
 			}else {
@@ -1573,7 +1572,7 @@ void loop() {
 			int date = generalFunctions.getValue(command, '#', 1).toInt();
 			int month = generalFunctions.getValue(command, '#', 2).toInt();
 			int year = generalFunctions.getValue(command, '#', 3).toInt();
-			boolean result  = sdCardManager.getHistoricalData( RememberedValueDataDirName,  date,  month,  year);
+			boolean result  = true;//sdCardManager.getHistoricalData( RememberedValueDataDirName,  date,  month,  year);
 			if (result) {
 				Serial.println("Ok-GetHistoricalRememberedValueData");
 			}else {
@@ -1591,7 +1590,7 @@ void loop() {
 			if(faultData=="Enter WPS"){
 
 				Serial.print("Fault#WPS Alert#Enter WPS#");
-				Serial.print(secretManager.generateCode());
+				//Serial.print(secretManager.generateCode());
 
 				Serial.print("#@On Load:Notify And Shutdown:Voltage At WPS#");
 				Serial.println(batteryVoltage);
