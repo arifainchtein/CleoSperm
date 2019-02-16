@@ -110,6 +110,15 @@ long TimeManager::dateAsSeconds(uint8_t year, uint8_t month, uint8_t date, uint8
 	return seconds;
 }
 
+long TimeManager::getTimeForCodeGeneration(){
+
+	DateTime now = RTC.now();
+	int seconds = now.second()+SECONDOFFSET;
+	int month = now.month()-1;
+	return dateAsSeconds(now.year(), month, now.day(), now.hour(), now.minute(), seconds);
+}
+
+
 
 DateTime TimeManager::getCurrentDateTime(){
 	return  RTC.now();

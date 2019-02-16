@@ -33,12 +33,10 @@ void SecretManager::readSecret(char *secretCode){
 
 long SecretManager::generateCode(){
 
-	DateTime now = timeManager.getCurrentDateTime();
 
-	int seconds = now.second()+SECONDOFFSET;
-	int month = now.month()-1;
 
-	long timestamp = timeManager.dateAsSeconds(now.year(), month, now.day(), now.hour(), now.minute(), seconds);
+	long timestamp = timeManager.getTimeForCodeGeneration();
+
 	char secretCode[SHARED_SECRET_LENGTH];
 	readSecret(secretCode);
 	TOTP totp = TOTP(secretCode);

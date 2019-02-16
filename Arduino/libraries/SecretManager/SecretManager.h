@@ -12,8 +12,6 @@
 class SecretManager{
 		TimeManager & timeManager;
 		 int SHARED_SECRET_LENGTH;
-		 int SECONDOFFSET;
-
 
 	public:
 		SecretManager(TimeManager & t) ;
@@ -21,6 +19,7 @@ class SecretManager{
 		void readSecret(char *secretCode);
 		long generateCode();
 		boolean checkCode(long userCode);
+
 	private:
 		char code[7];
 

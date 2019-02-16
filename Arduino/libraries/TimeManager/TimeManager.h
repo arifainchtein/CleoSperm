@@ -26,6 +26,7 @@ class TimeManager{
 		long getCurrentTimeInSeconds();
 		String getElapsedTimeHoursMinutesSecondsString(long elapsedTime);
 		DateTime getCurrentDateTime();
+		long getTimeForCodeGeneration();
 		//
 		// Functions that represent Serial commands
 		//
