@@ -109,7 +109,7 @@ void TimeManager::start(){
 		// uncomment it & upload to set the time, date and start run the RTC!
 		RTC.adjust(DateTime(__DATE__, __TIME__));
 		Serial.println("Current time:");
-		getTime();
+		printTimeToSerial();
 	}
 
 }
@@ -154,13 +154,13 @@ long TimeManager::dateAsSeconds(uint8_t year, uint8_t month, uint8_t date, uint8
 
 String TimeManager::getCurrentTimeForDisplay(){
 	DateTime now = RTC.now();
-	String displayTime =  now.hour()+":"+now.minute()":"+now.second();
+	String displayTime =  now.hour()+":"+now.minute() + ":"+now.second();
 	return displayTime;
 }
 
 String TimeManager::getCurrentDateTimeForDisplay(){
 	DateTime now = RTC.now();
-	String displayTime = now.day()+"/"+now.month()+"/"+now.year()+ " " +now.hour()+":"+now.minute()":"+now.second();
+	String displayTime = now.day()+"/"+now.month()+"/"+now.year()+ " " +now.hour()+":"+now.minute() + ":"+now.second();
 	return displayTime;
 }
 
