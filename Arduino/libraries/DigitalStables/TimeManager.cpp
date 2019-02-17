@@ -185,14 +185,15 @@ String TimeManager::getCurrentDateForDisplay(){
 long TimeManager::getTimeForCodeGeneration(){
 
 	rtc.read();
-	int seconds = rtc.second+SECONDOFFSET;
-	int month = rtc.month-1;
+	uint8_t seconds = rtc.second+SECONDOFFSET;
+	uint8_t month = rtc.month-1;
 	_HardSerial.println("getTimeForCodeGeneration,about to call dateAsSeconds");
-	int year = rtc.year;
-	int date = rtc.date;
-	int hour = rtc.hour;
-	int minute=rtc.minute;
+	uint8_t year = rtc.year;
+	uint8_t date = rtc.day;
+	uint8_t hour = rtc.hour;
+	uint8_t minute=rtc.minute;
 	_HardSerial.println(year);
+	_HardSerial.flush();
 	return dateAsSeconds(year, month, date, hour, minute, seconds);
 }
 
