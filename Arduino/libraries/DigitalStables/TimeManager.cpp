@@ -178,9 +178,9 @@ long TimeManager::getTimeForCodeGeneration(){
 	//uint8_t date = rtc.day;
 	//uint8_t hour = rtc.hour;
 	//uint8_t minute=rtc.minute;
-	_HardSerial.print("getTimeForCodeGeneration,about to call dateAsSeconds, year=");
-	_HardSerial.println(year);
-	_HardSerial.flush();
+//	_HardSerial.print("getTimeForCodeGeneration,about to call dateAsSeconds, year=");
+//	_HardSerial.println(year);
+//	_HardSerial.flush();
 	return dateAsSeconds(year, month, anRTCInfoRecord.date, anRTCInfoRecord.hour, anRTCInfoRecord.minute, anRTCInfoRecord.second );
 }
 
