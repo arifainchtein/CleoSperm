@@ -8,7 +8,8 @@
 #include <TimeManager.h>
 #include <RTCInfoRecord>
 #include <Wire.h>
-#include <GravityRtc.h>
+//#include <GravityRtc.h>
+#include "libraries/GravityRtc/GravityRtc.h"
 #include <GeneralFunctions.h>
 
 #define LEAP_YEAR(_year) ((_year%4)==0)

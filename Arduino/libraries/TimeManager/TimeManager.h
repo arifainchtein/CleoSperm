@@ -8,8 +8,10 @@
 #ifndef TIMEMANAGER_H_
 #define TIMEMANAGER_H_
 #include <Arduino.h>
-h
-#include <GravityRtc.h>
+
+//#include <GravityRtc.h>
+#include "libraries/GravityRtc/GravityRtc.h"
+
 #include <GeneralFunctions.h>
 #include <RTCInfoRecord>
 
