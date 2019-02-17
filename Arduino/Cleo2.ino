@@ -2,7 +2,7 @@
 //
 //
 #include <RTCInfoRecord.h>
-#include <DigitalStables/WPSSensorRecord.h>
+#include <WPSSensorRecord.h>
 #include <rgb_lcd.h>
 #include <ChainableLED.h>
 #include <EEPROM.h>
