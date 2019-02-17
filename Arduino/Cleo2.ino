@@ -1290,13 +1290,14 @@ void loop() {
 				}else{
 					Serial.println("Failure-SetTime");
 				}
-				Serial.println("Ok-SetTime");
+
 				Serial.flush();
 			}
 
 		}else if(command.startsWith("GetTime")){
 			String time = timeManager.getCurrentDateTimeForDisplay();
 			Serial.println(time);
+			Serial.flush();
 			Serial.println("Ok-GetTime");
 			Serial.flush();
 		}else if(command.startsWith("VerifyUserCode")){
