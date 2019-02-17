@@ -959,6 +959,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 void setup() {
 	// put your setup code here, to run once:
 	lcd.begin(16,2);
+	lcd.print("initializing" );
 	Serial.begin(9600);
 	timeManager.start();
 	sdCardManager.start();
@@ -970,7 +971,7 @@ void setup() {
 	pinMode(CURRENT_SENSOR, INPUT);
 	pinMode(PI_POWER_PIN, OUTPUT);
 
-	lcd.print("initializing" );
+
 	leds.setColorRGB(0, 255, 255, 0);
 	leds.setColorRGB(1, 255, 0, 0);
 	leds.setColorRGB(2, 255, 0, 255);
@@ -978,6 +979,7 @@ void setup() {
 
 	pinMode(selectPin, INPUT);
 	pinMode(actionPin, INPUT);
+	lcd.print("initializing" );
 }
 
 void loop() {
@@ -1293,13 +1295,9 @@ void loop() {
 			}
 
 		}else if(command.startsWith("GetTime")){
-			boolean result = timeManager.printTimeToSerial();
-			if(result){
-				Serial.println("Ok-GetTime");
-			}else{
-				Serial.println("Failure-GetTime");
-			}
-
+			String time = timeManager.getCurrentDateTimeForDisplay();
+			Serial.println(time);
+			Serial.println("Ok-GetTime");
 			Serial.flush();
 		}else if(command.startsWith("VerifyUserCode")){
 			String codeInString = generalFunctions.getValue(command, '#', 1);
