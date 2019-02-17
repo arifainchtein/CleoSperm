@@ -9,13 +9,13 @@
 #include <SPI.h>
 #include <SD.h>
 #include "Arduino.h"
-#include <DigitalStables/SDCardManager.h>
-#include <DigitalStables/GeneralFunctions.h>
+#include <SDCardManager.h>
+#include <GeneralFunctions.h>
 #include <TimeManager.h>
 
-#include <DigitalStables/WPSSensorRecord.h>
-#include "/home/pi/Teleonome/Arduino/libraries/GravityRtc/GravityRtc.h"
-#include <DigitalStables/RTCInfoRecord.h>
+#include <WPSSensorRecord.h>
+#include <GravityRtc.h>
+#include <RTCInfoRecord.h>
 #define SD_PIN 53
 extern rgb_lcd lcd;
 extern char sensorDirName[10];

@@ -1,8 +1,8 @@
 #include "Arduino.h"
-#include <DigitalStables/SecretManager.h>
+#include <SecretManager.h>
 #include <EEPROM.h>
 #include <totp.h>
-#include <DigitalStables/TimeManager.h>
+#include <TimeManager.h>
 
 
 SecretManager::SecretManager(TimeManager& t): timeManager(t){

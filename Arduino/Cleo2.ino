@@ -1,18 +1,17 @@
 //this is the firmware for Cleo
 //
 //
-#include <DigitalStables/RTCInfoRecord.h>
+#include <RTCInfoRecord.h>
 #include <DigitalStables/WPSSensorRecord.h>
 #include <rgb_lcd.h>
 #include <ChainableLED.h>
-#include <Wire.h>
 #include <EEPROM.h>
 #include <SPI.h>
 #include <SD.h>
-#include <DigitalStables/TimeManager.h>
-#include <DigitalStables/GeneralFunctions.h>
-#include <DigitalStables/SecretManager.h>
-#include <DigitalStables/SDCardManager.h>
+#include <TimeManager.h>
+#include <GeneralFunctions.h>
+#include <SecretManager.h>
+#include <SDCardManager.h>
 #include "DHT.h"
 #include <OneWire.h>
 #include <avr/sleep.h>
@@ -979,16 +978,6 @@ void setup() {
 
 	pinMode(selectPin, INPUT);
 	pinMode(actionPin, INPUT);
-
-
-	//setup clock
-	Wire.begin();
-
-
-
-
-
-
 }
 
 void loop() {

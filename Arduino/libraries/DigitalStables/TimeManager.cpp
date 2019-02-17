@@ -9,7 +9,7 @@
 //#include "/home/pi/Teleonome/Arduino/libraries/GravityRtc/GravityRtc.h"
 //#include <GravityRtc/GravityRtc.h>
 
-#include <DigitalStables/RTCInfoRecord.h>
+#include <RTCInfoRecord.h>
 
 #include <GravityRtc.h>
 

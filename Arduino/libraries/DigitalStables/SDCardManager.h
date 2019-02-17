@@ -9,8 +9,8 @@
 
 #include "Arduino.h"
 #include <SD.h>
-#include <DigitalStables/GeneralFunctions.h>
-#include <DigitalStables/TimeManager.h>
+#include <GeneralFunctions.h>
+#include <TimeManager.h>
 
 class SDCardManager{
 	TimeManager & timeManager;
