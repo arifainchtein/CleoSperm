@@ -9,7 +9,7 @@
 #define TIMEMANAGER_H_
 #include <Arduino.h>
 //#include <GravityRtc.h>
-#include "GravityRtc.h"
+#include <GravityRtc.h>
 #include <GeneralFunctions.h>
 #include <RTCInfoRecord>
 
@@ -41,7 +41,7 @@ class TimeManager{
 
 	private:
 
-
+		GravityRtc rtc;
 		int chipSelect = 10;
 		int timeZoneHours=11;
 		int SECONDOFFSET=10;
