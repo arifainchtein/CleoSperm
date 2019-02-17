@@ -5,6 +5,10 @@
 #include <TimeManager.h>
 
 extern int SHARED_SECRET_LENGTH;
+char code[7];
+int currentCommandCodeHistoryPos=0;
+int numberOfCommandCodesInHistory=5;
+long commandCodeHistory[5]={999999,999999,999999,99999,99999};
 
 SecretManager::SecretManager(TimeManager& t): timeManager(t){
 
