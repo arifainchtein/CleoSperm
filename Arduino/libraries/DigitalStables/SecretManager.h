@@ -11,7 +11,7 @@
 
 class SecretManager{
 		TimeManager & timeManager;
-		 int SHARED_SECRET_LENGTH=27;
+
 			char code[7];
 			int currentCommandCodeHistoryPos=0;
 			int numberOfCommandCodesInHistory=5;
