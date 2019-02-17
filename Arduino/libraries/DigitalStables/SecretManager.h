@@ -11,7 +11,7 @@
 
 class SecretManager{
 		TimeManager & timeManager;
-		 int SHARED_SECRET_LENGTH;
+		 int SHARED_SECRET_LENGTH=27;
 
 	public:
 		SecretManager(TimeManager & t) ;
