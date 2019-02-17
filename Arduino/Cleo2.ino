@@ -17,8 +17,9 @@
 #include <avr/power.h>
 #include <avr/wdt.h>
 //#include "totp.h"
+static  byte monthDays2[]={31,28,31,30,31,30,31,31,30,31,30,31};
 
-
+#define LEAP_YEAR2(_year) ((_year%4)==0)
 
 //
 // the ambient sensor
@@ -1310,8 +1311,51 @@ void loop() {
 			delay(delayTime);
 		}else if(command.startsWith("GetCommandCodeGenerationTime")){
 
-			long seconds =timeManager.getTimeForCodeGeneration();
+			//long seconds =timeManager.getTimeForCodeGeneration();
+			RTCInfoRecord r = timeManager.getCurrentDateTime();
+			Serial.print("y=");
+			Serial.println(r.year);
+			Serial.print("m=");
+			Serial.println(r.month);
+			Serial.print("d");
+			Serial.println(r.date);
+			int i;
+				//long seconds;
+				int year, seconds;
+				if(r.year < 69)
+					year+= 2000;
+				// seconds from 1970 till 1 jan 00:00:00 this year
+				seconds= (year-1970)*(60*60*24L*365);
+				Serial.print("p1:");
+				Serial.println(seconds);
+				// add extra days for leap years
+				for (i=1970; i<year; i++) {
+					if (LEAP_YEAR2(i)) {
+						seconds+= 60*60*24L;
+					}
+				}
+				// add days for this year
+				for (i=0; i<r.month; i++) {
+					if (i==1 && LEAP_YEAR2(year)) {
+						seconds+= 60*60*24L*29;
+					} else {
+						seconds+= 60*60*24L*monthDays2[i];
+					}
+				}
+				Serial.print("p2:");
+								Serial.println(seconds);
+				seconds+= (r.date-1)*3600*24L;
+				Serial.print("p3:");
+								Serial.println(seconds);
+				seconds+= r.hour*3600L;
+				Serial.print("p4:");
+								Serial.println(seconds);
+				seconds+= r.minute*60L;
+				seconds -=  11*3600L;
+				seconds+=r.second;
+
 			Serial.println(seconds);
+			Serial.println("Ok-GetCommandCodeGenerationTime");
 			Serial.flush();
 			delay(delayTime);
 		}else if(command.startsWith("GetCommandCode")){

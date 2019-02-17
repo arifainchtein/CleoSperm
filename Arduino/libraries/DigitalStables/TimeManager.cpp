@@ -139,7 +139,8 @@ String TimeManager::getCurrentDateTimeForDisplay(){
 	displayTime.concat("/");
 	displayTime.concat(rtc.month);
 	displayTime.concat("/");
-	displayTime.concat(rtc.year);
+	int year = rtc.year-2000;
+		displayTime.concat(year);
 	displayTime.concat(" ");
 	displayTime.concat(rtc.hour);
 	displayTime.concat(":");
@@ -157,7 +158,8 @@ String TimeManager::getCurrentDateForDisplay(){
 	displayTime.concat("/");
 	displayTime.concat(rtc.month);
 	displayTime.concat("/");
-	displayTime.concat(rtc.year);
+	int year = rtc.year-2000;
+	displayTime.concat(year);
 
 	return displayTime;
 }
