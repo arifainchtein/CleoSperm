@@ -1619,6 +1619,9 @@ void loop() {
 		boolean commandProcessed = processDefaultCommands( command, batteryVoltage);
 		if(!commandProcessed){
 			if (command.startsWith("UpdateTeleonomeStatus")){
+// UpdateTeleonomeStatus#1#success#Test
+				//UpdateTeleonomeStatus#3#success#Test
+
 				int id = generalFunctions.getValue(command, '#', 1).toInt();
 				String statusValue = generalFunctions.getValue(command, '#', 2);
 				String info = generalFunctions.getValue(command, '#', 3);
@@ -1639,7 +1642,7 @@ void loop() {
 				}else  if(statusValue=="stale"){
 					leds.setColorRGB(id, 148, 0, 211);
 				}
-				Serial.println("UpdateTeleonomeStatus");
+				Serial.println("Ok-UpdateTeleonomeStatus");
 				Serial.flush();
 				delay(delayTime);
 			}else{
