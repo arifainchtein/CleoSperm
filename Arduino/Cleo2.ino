@@ -1308,6 +1308,12 @@ void loop() {
 			Serial.println(result);
 			Serial.flush();
 			delay(delayTime);
+		}else if(command.startsWith("GetCommandCodeGenerationTime")){
+
+			long seconds =timeManager.getTimeForCodeGeneration();
+			Serial.println(seconds);
+			Serial.flush();
+			delay(delayTime);
 		}else if(command.startsWith("GetCommandCode")){
 
 			long code =secretManager.generateCode();
