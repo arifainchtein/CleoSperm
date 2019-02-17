@@ -5,7 +5,6 @@
 #include <WPSSensorRecord.h>
 #include <rgb_lcd.h>
 #include <ChainableLED.h>
-#include <EEPROM.h>
 #include <SPI.h>
 #include <SD.h>
 #include <TimeManager.h>
@@ -1608,7 +1607,7 @@ void loop() {
 		// and also substract the seconds spent in powerdownMode
 		// finally add the poweredDownInLoopSeconds to the daily total
 
-		int loopConsumingPowerSeconds = getCurrentTimeInSeconds()-now -poweredDownInLoopSeconds;
+		int loopConsumingPowerSeconds = timeManager.getCurrentTimeInSeconds()-now -poweredDownInLoopSeconds;
 		dailyBatteryOutEnergy+= loopConsumingPowerSeconds*currentValue/3600;
 		hourlyBatteryOutEnergy+= loopConsumingPowerSeconds*currentValue/3600;
 		dailyPoweredDownInLoopSeconds+=poweredDownInLoopSeconds;
