@@ -16,7 +16,7 @@
 #include <avr/sleep.h>
 #include <avr/power.h>
 #include <avr/wdt.h>
-//#include "totp.h"
+#include <totp.h>
 static  byte monthDays2[]={31,28,31,30,31,30,31,31,30,31,30,31};
 
 #define LEAP_YEAR2(_year) ((_year%4)==0)
@@ -1312,8 +1312,20 @@ void loop() {
 		}else if(command.startsWith("GetCommandCodeGenerationTime")){
 
 			long secOrig =timeManager.getTimeForCodeGeneration();
+
 			Serial.print("secOrig=");
 			Serial.println(secOrig);
+			Serial.flush();
+				char secretCode[SHARED_SECRET_LENGTH];
+				secretManager.readSecret(secretCode);
+				Serial.print("secretCode=");
+							Serial.println(secretCode);
+							Serial.flush();
+
+				TOTP totp = TOTP(secretCode);
+				long code=totp. gen_code  (secOrig ) ;
+
+
 			long code =secretManager.generateCode();
 			Serial.print("code=");
 						Serial.println(code);
