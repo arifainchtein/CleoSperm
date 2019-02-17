@@ -19,7 +19,7 @@
 * date    :  2017-04-18
 **********************************************************************/
 
-#include "GravityRtc.h"
+#include <GravityRtc.h>
 #include "Arduino.h"
 #include "Wire.h"
 
