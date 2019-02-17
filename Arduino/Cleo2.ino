@@ -40,7 +40,7 @@ boolean powerSupplyOn=false;
 
 //
 // current view index
-// Controls what the user sees in the lcd
+// Controls what the user sees in the lcdnow
 // it starts with a value of 99 which means is locked
 int currentViewIndex=0;
 
@@ -984,10 +984,10 @@ void setup() {
 
 void loop() {
 
-	if(!powerSupplyOn){
-		digitalWrite(PI_POWER_PIN, HIGH);
-		powerSupplyOn=true;
-	}
+//	if(!powerSupplyOn){
+//		digitalWrite(PI_POWER_PIN, HIGH);
+//		powerSupplyOn=true;
+//	}
 
 
 
@@ -1602,4 +1602,16 @@ void loop() {
 			Serial.flush();
 		}
 	}
+	//
+		// this is the end of the loop, to calculate the energy spent on this loop
+		// take the time substract the time at the beginning of the loop (the now variable defined above)
+		// and also substract the seconds spent in powerdownMode
+		// finally add the poweredDownInLoopSeconds to the daily total
+
+		int loopConsumingPowerSeconds = getCurrentTimeInSeconds()-now -poweredDownInLoopSeconds;
+		dailyBatteryOutEnergy+= loopConsumingPowerSeconds*currentValue/3600;
+		hourlyBatteryOutEnergy+= loopConsumingPowerSeconds*currentValue/3600;
+		dailyPoweredDownInLoopSeconds+=poweredDownInLoopSeconds;
+		hourlyPoweredDownInLoopSeconds+=poweredDownInLoopSeconds;
+
 }

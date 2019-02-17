@@ -5,8 +5,9 @@
 #include <TimeManager.h>
 
 
+
 SecretManager::SecretManager(TimeManager& t): timeManager(t){
-	
+
 }
 
 void SecretManager::saveSecret(String secret, int numberDigits, int periodSeconds ){
