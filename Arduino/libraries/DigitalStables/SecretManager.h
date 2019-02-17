@@ -12,6 +12,10 @@
 class SecretManager{
 		TimeManager & timeManager;
 		 int SHARED_SECRET_LENGTH=27;
+			char code[7];
+			int currentCommandCodeHistoryPos=0;
+			int numberOfCommandCodesInHistory=5;
+			long commandCodeHistory[5]={999999,999999,999999,99999,99999};
 
 	public:
 		SecretManager(TimeManager & t) ;
@@ -21,12 +25,6 @@ class SecretManager{
 		boolean checkCode(long userCode);
 
 	private:
-		char code[7];
-
-
-		int currentCommandCodeHistoryPos=0;
-		int numberOfCommandCodesInHistory=5;
-		long commandCodeHistory[5]={999999,999999,999999,99999,99999};
 
 };
 
