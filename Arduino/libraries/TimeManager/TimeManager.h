@@ -18,6 +18,7 @@
 class TimeManager{
 	HardwareSerial& _HardSerial;
 	GeneralFunctions& generalFunctions;
+	GravityRtc rtc;
 
 	public:
 		TimeManager(GeneralFunctions& g, HardwareSerial& serial);
@@ -43,10 +44,10 @@ class TimeManager{
 
 	private:
 
-		GravityRtc rtc;
+
 		int chipSelect = 10;
 		int timeZoneHours=11;
 		int SECONDOFFSET=10;
-		byte TimeManager::decToBcd(byte val);
+
 	};
 #endif /* TIMEMANAGER_H_ */

@@ -9,7 +9,6 @@
 #include "/home/pi/Teleonome/Arduino/libraries/GravityRtc/GravityRtc.h"
 #include "/home/pi/Teleonome/Arduino/libraries/RTCInfoRecord/RTCInfoRecord.h"
 
-#include <Wire.h>
 //#include <GravityRtc.h>
 
 #include <GeneralFunctions.h>
@@ -23,7 +22,7 @@ static  byte monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
 GravityRtc rtc;
 
 TimeManager::TimeManager(GeneralFunctions& g, HardwareSerial& serial):generalFunctions(g),  _HardSerial(serial){
-	Wire.begin();
+
 }
 
 //
@@ -32,10 +31,6 @@ TimeManager::TimeManager(GeneralFunctions& g, HardwareSerial& serial):generalFun
 
 
 
-byte TimeManager::decToBcd(byte val){
-	// Convert normal decimal numbers to binary coded decimal
-	return ( (val/10*16) + (val%10) );
-}
 
 
 boolean TimeManager::setTime(String command){
