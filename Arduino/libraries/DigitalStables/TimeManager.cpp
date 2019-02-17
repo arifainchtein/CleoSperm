@@ -183,7 +183,7 @@ String TimeManager::getCurrentDateForDisplay(){
 
 
 long TimeManager::getTimeForCodeGeneration(){
-
+	rtc.read();
 	RTCInfoRecord anRTCInfoRecord =getCurrentDateTime();
 	uint8_t seconds = anRTCInfoRecord.second+SECONDOFFSET;
 	uint8_t month = anRTCInfoRecord.month-1;
