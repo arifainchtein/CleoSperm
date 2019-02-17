@@ -6,7 +6,6 @@
 #include <rgb_lcd.h>
 #include <ChainableLED.h>
 #include <Wire.h>
-#include <RTClib.h>
 #include <EEPROM.h>
 #include <SPI.h>
 #include <SD.h>
