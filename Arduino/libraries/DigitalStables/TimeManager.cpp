@@ -187,7 +187,13 @@ long TimeManager::getTimeForCodeGeneration(){
 	rtc.read();
 	int seconds = rtc.second+SECONDOFFSET;
 	int month = rtc.month-1;
-	return dateAsSeconds(rtc.year, month, rtc.day, rtc.hour, rtc.minute, seconds);
+	_HardSerial.println("getTimeForCodeGeneration,about to call dateAsSeconds");
+	int year = rtc.year;
+	int date = rtc.date;
+	int hour = rtc.hour;
+	int minute=rtc.minute;
+	_HardSerial.println(year);
+	return dateAsSeconds(year, month, date, hour, minute, seconds);
 }
 
 
