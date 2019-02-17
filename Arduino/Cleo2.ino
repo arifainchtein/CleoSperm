@@ -1311,7 +1311,9 @@ void loop() {
 			delay(delayTime);
 		}else if(command.startsWith("GetCommandCodeGenerationTime")){
 
-			//long seconds =timeManager.getTimeForCodeGeneration();
+			long secOrig =timeManager.getTimeForCodeGeneration();
+			Serial.print("secOrig=");
+			Serial.println(secOrig);
 			RTCInfoRecord r = timeManager.getCurrentDateTime();
 			Serial.print("y=");
 			Serial.println(r.year);
@@ -1322,6 +1324,7 @@ void loop() {
 			int i;
 				long seconds;
 				int year;
+				int month = r.month-1;
 				if(r.year < 69){
 					year+=r.year +  2000;
 				}else{
@@ -1338,7 +1341,7 @@ void loop() {
 					}
 				}
 				// add days for this year
-				for (i=0; i<r.month; i++) {
+				for (i=0; i<month; i++) {
 					if (i==1 && LEAP_YEAR2(year)) {
 						seconds+= 60*60*24L*29;
 					} else {
