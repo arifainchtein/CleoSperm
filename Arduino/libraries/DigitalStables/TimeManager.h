@@ -22,7 +22,7 @@ class TimeManager{
 	public:
 		TimeManager(GeneralFunctions& g, HardwareSerial& serial);
                 void start();
-		long dateAsSeconds(uint8_t year, uint8_t month, uint8_t date, uint8_t hour, uint8_t minute, uint8_t second);
+		long dateAsSeconds(uint16_t year, uint8_t month, uint8_t date, uint8_t hour, uint8_t minute, uint8_t second);
 		void hourlyTasks(long time, int previousHour );
 		void dailyTasks(long time, int yesterdayDate, int yesterdayMonth, int yesterdayYear );
 		void monthlyTasks(long time);

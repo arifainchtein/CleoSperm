@@ -84,7 +84,7 @@ void TimeManager::start(){
 
 
 
-long TimeManager::dateAsSeconds(uint8_t year, uint8_t month, uint8_t date, uint8_t hour, uint8_t minute, uint8_t second){
+long TimeManager::dateAsSeconds(uint16_t year, uint8_t month, uint8_t date, uint8_t hour, uint8_t minute, uint8_t second){
 
 
 	// note year argument is full four digit year (or digits since 2000), i.e.1975, (year 8 is 2008
