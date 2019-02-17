@@ -955,6 +955,386 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 	}
 }
 
+boolean processDefaultCommands(String command, float batteryVoltage){
+	boolean processed=false;
+	if(command=="TestWPSSensor"){
+		float batteryVoltage = getBatteryVoltage();
+		float current = calculateCurrent();
+		int stateOfCharge= generalFunctions.getStateOfCharge(batteryVoltage);
+		boolean result = true;//sdCardManager.testWPSSensor( batteryVoltage,  current,  stateOfCharge,  operatingStatus);
+		if(result){
+			Serial.println("Ok-TestWPSSensor");
+		}else{
+			Serial.println("Failure-TestWPSSensor");
+		}
+		Serial.flush();
+		processed=true;
+	}else if(command=="TestLifeCycle"){
+		long now = timeManager.getCurrentTimeInSeconds();
+		//sdCardManager.storeLifeCycleEvent(now, LIFE_CYCLE_EVENT_END_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
+		Serial.println("Ok-TestLifeCycle");
+		Serial.flush();
+
+	}else if(command=="ListFiles"){
+		Serial.println(" ");
+		Serial.println(" ");
+		Serial.println(sensorDirName);
+		float total = 0.0;//sdCardListFiles();
+
+
+		Serial.println(" ");
+
+		Serial.print("Used (Kb):  ");
+		Serial.println(total);
+
+		Serial.println("");
+		Serial.println("Ok-ListFiles");
+		Serial.flush();
+		processed=true;
+	}else if(command=="Ping"){
+
+		Serial.println("Ok-Ping");
+		Serial.flush();
+		processed=true;
+	}else if(command.startsWith("SetTime")){
+
+		if(capacitorVoltage==0){
+			//
+			// we are in normal operation
+			//
+			Serial.println("Failure-SetTime");
+			Serial.flush();
+
+		}else{
+			boolean result = timeManager.setTime(command);
+			if(result){
+				Serial.println("Ok-SetTime");
+			}else{
+				Serial.println("Failure-SetTime");
+			}
+
+			Serial.flush();
+		}
+		processed=true;
+
+	}else if(command.startsWith("GetTime")){
+		String time = timeManager.getCurrentDateTimeForDisplay();
+		Serial.println(time);
+		Serial.flush();
+		Serial.println("Ok-GetTime");
+		Serial.flush();
+		processed=true;
+	}else if(command.startsWith("VerifyUserCode")){
+		String codeInString = generalFunctions.getValue(command, '#', 1);
+		long userCode = codeInString.toInt();
+		boolean validCode = secretManager.checkCode( userCode);
+		String result="Failure-Invalid Code";
+		if(validCode)result="Ok-Valid Code";
+		Serial.println(result);
+		Serial.flush();
+		delay(delayTime);
+		processed=true;
+	}else if(command.startsWith("GetCommandCodeGenerationTime")){
+
+		long secOrig =timeManager.getTimeForCodeGeneration();
+
+		Serial.print("secOrig=");
+		Serial.println(secOrig);
+		Serial.flush();
+		char secretCode[SHARED_SECRET_LENGTH];
+		secretManager.readSecret(secretCode);
+		Serial.print("secretCode=");
+		Serial.println(secretCode);
+		Serial.flush();
+
+		TOTP totp = TOTP(secretCode);
+		long code=totp. gen_code  (secOrig ) ;
+
+
+		//long code =secretManager.generateCode();
+		Serial.print("code=");
+		Serial.println(code);
+		Serial.println("Ok-GetCommandCodeGenerationTime");
+		Serial.flush();
+		delay(delayTime);
+		processed=true;
+	}else if(command.startsWith("GetCommandCode")){
+
+		long code =secretManager.generateCode();
+		//
+		// patch a bug in the totp library
+		// if the first digit is a zero, it
+		// returns a 5 digit number
+		if(code<100000){
+			Serial.print("0");
+			Serial.println(code);
+		}else{
+			Serial.println(code);
+		}
+		Serial.flush();
+		delay(delayTime);
+		processed=true;
+	}else if(command.startsWith("GetSecret")){
+		if(capacitorVoltage==0){
+			//
+			// we are in normal operation
+			//
+			Serial.println("Failure-GetSecret");
+			Serial.flush();
+		}else{
+			char secretCode[SHARED_SECRET_LENGTH];
+			secretManager.readSecret(secretCode);
+			Serial.println(secretCode);
+			Serial.println("Ok-GetSecret");
+			Serial.flush();
+			delay(delayTime);
+		}
+
+		processed=true;
+	} else if(command.startsWith("SetSecret")){
+		if(capacitorVoltage==0){
+			//
+			// we are in normal operation
+			//
+			Serial.println("Failure-SetSecret");
+			Serial.flush();
+		}else{
+			String secret = generalFunctions.getValue(command, '#', 1);
+			int numberDigits = generalFunctions.getValue(command, '#', 2).toInt();
+			int periodSeconds = generalFunctions.getValue(command, '#', 3).toInt();
+			secretManager.saveSecret(secret, numberDigits, periodSeconds);
+
+			Serial.println("Ok-SetSecret");
+			Serial.flush();
+		}
+		delay(delayTime);
+		processed=true;
+	}else if(command.startsWith("PulseStart")){
+		inPulse=true;
+		pulseStartTime = generalFunctions.getValue(command, '#', 1);
+		Serial.println("Ok-PulseStart");
+		Serial.flush();
+		lcd.clear();
+		lcd.setRGB(255,0,0);
+		processed=true;
+	}else if(command.startsWith("PulseFinished")){
+		pulseStopTime = generalFunctions.getValue(command, '#', 1);
+		inPulse=false;
+		Serial.println("Ok-PulseFinished");
+		Serial.flush();
+		lcd.clear();
+		lcd.setRGB(255,255,255);
+		processed=true;
+
+
+	}else if(command.startsWith("IPAddr")){
+		currentIpAddress = generalFunctions.getValue(command, '#', 1);
+		Serial.println("Ok-IPAddr");
+		Serial.flush();
+		delay(delayTime);
+		processed=true;
+	}else if(command.startsWith("SSID")){
+		currentSSID = generalFunctions.getValue(command, '#', 1);
+		Serial.println("Ok-currentSSID");
+		Serial.flush();
+		delay(delayTime);
+		processed=true;
+	}else if(command.startsWith("HostMode")  ){
+		Serial.println("Ok-HostMode");
+		Serial.flush();
+		delay(delayTime);
+		isHost=true;
+		processed=true;
+	}else if(command.startsWith("NetworkMode")   ){
+		Serial.println("Ok-NetworkMode");
+		Serial.flush();
+		delay(delayTime);
+		isHost=false;
+		processed=true;
+	}else if(command.startsWith("GetSensorData")){
+		Serial.println(toReturn);
+		Serial.flush();
+		processed=true;
+	}else if(command.startsWith("EnterWPS")){
+		//EnterWPS#10#45#30#1
+		secondsToTurnPowerOff = (long)generalFunctions.getValue(command, '#', 1).toInt();
+		secondsToNextPiOn = (long)generalFunctions.getValue(command, '#', 2).toInt();
+		wpsPulseFrequencySeconds = generalFunctions.getValue(command, '#', 3).toInt();
+		int pauseDuringWPSi = generalFunctions.getValue(command, '#', 4).toInt();
+		if(pauseDuringWPSi==1)pauseDuringWPS=true;
+		else pauseDuringWPS=false;
+		waitingForWPSConfirmation=false;
+		wpsCountdown=true;
+		operatingStatus="WPS";
+		wpsCountDownStartSeconds= timeManager.getCurrentTimeInSeconds();
+		currentSecondsToPowerOff=0L;
+
+		Serial.println("Ok-EnterWPS");
+		Serial.flush();
+		processed=true;
+	}else if(command.startsWith("ExitWPS")){
+
+		Serial.println("Ok-ExitWPS");
+		Serial.flush();
+		inWPS=false;
+		operatingStatus="Normal";
+		currentSecondsToPowerOff=0L;
+		wpsCountdown=false;
+		processed=true;
+	}else if(command.startsWith("UpdateWPSParameters")){
+		String minWPSVoltageS = generalFunctions.getValue(command, '#', 1);
+		char buffer[10];
+		minWPSVoltageS.toCharArray(buffer, 10);
+		minWPSVoltage = atof(buffer);
+
+		minWPSVoltage = generalFunctions.stringToFloat(generalFunctions.getValue(command, '#', 1));
+		enterWPSVoltage = generalFunctions.stringToFloat(generalFunctions.getValue(command, '#', 2));
+		exitWPSVoltage = generalFunctions.stringToFloat(generalFunctions.getValue(command, '#', 3));
+
+		secondsToForcedWPS = generalFunctions.getValue(command, '#', 4).toInt();
+		Serial.println("Ok-UpdateWPSParameters");
+		Serial.flush();
+
+		processed=true;
+
+	}else if(command.startsWith("GetRememberedValueData")){
+		//GetRememberedValueData#0
+		int transferData = generalFunctions.getValue(command, '#', 1).toInt();
+		boolean result = true;//sdCardManager.readUntransferredFileFromSDCard( transferData,true, RememberedValueDataDirName);
+		if(result){
+			Serial.println("Ok-GetRememberedValueData");
+		}else {
+			char text[44];
+			snprintf(text, sizeof text, "Failure-error opening %s/%s", remFileName, unstraferedFileName);
+			Serial.println(text);
+		}
+		Serial.flush();
+		processed=true;
+	}else if(command.startsWith("GetLifeCycleData")){
+		//GetLifeCycleData#0
+		int transferData = generalFunctions.getValue(command, '#', 1).toInt();
+		boolean result = true;//sdCardManager.readUntransferredFileFromSDCard( transferData,true, LifeCycleDataDirName);
+		if(result){
+			Serial.println("Ok-GetLifeCycleData");
+		}else {
+			char text[44];
+			snprintf(text, sizeof text, "Failure-error opening %s/%s", LifeCycleDataDirName, unstraferedFileName);
+			Serial.println(text);
+		}
+		Serial.flush();
+		processed=true;
+	}else if(command.startsWith("GetWPSSensorData")){
+		//GetWPSSensorData#0
+		//GetLifeCycleData#0
+		int transferData = generalFunctions.getValue(command, '#', 1).toInt();
+		boolean result = true;//sdCardManager.readUntransferredFileFromSDCard( transferData,true, WPSSensorDataDirName);
+		if(result){
+			Serial.println("Ok-GetWPSSensorData");
+		}else {
+
+			char text[44];
+			snprintf(text, sizeof text, "Failure-error opening /%s/%s", WPSSensorDataDirName, unstraferedFileName);
+			Serial.println(text);
+
+		}
+		Serial.flush();
+		processed=true;
+	}else if(command.startsWith("GetHistoricalWPSSensorData")){
+
+		int date = generalFunctions.getValue(command, '#', 1).toInt();
+		int month = generalFunctions.getValue(command, '#', 2).toInt();
+		int year = generalFunctions.getValue(command, '#', 3).toInt();
+		boolean result  = true;//sdCardManager.getHistoricalData( WPSSensorDataDirName,  date,  month,  year);
+		if(result){
+			Serial.println("Ok-GetWPSSensorDataHistory");
+		}else {
+			char text[44];
+			snprintf(text, sizeof text, "Failure-error opening %s/%s", WPSSensorDataDirName, unstraferedFileName);
+
+			Serial.println(text);
+		}
+		Serial.flush();
+		processed=true;
+	}else if(command.startsWith("GetHistoricalLifeCycleData")){
+		//GetHistoricalLifeCycleData#12#1#19
+		int date = generalFunctions.getValue(command, '#', 1).toInt();
+		int month = generalFunctions.getValue(command, '#', 2).toInt();
+		int year = generalFunctions.getValue(command, '#', 3).toInt();
+		boolean result  = true;//sdCardManager.getHistoricalData( LifeCycleDataDirName,  date,  month,  year);
+		if (result) {
+			Serial.println("Ok-GetHistoricalLifeCycleData");
+		}else {
+			char text[44];
+			snprintf(text, sizeof text, "Failure-error opening %s/%s", LifeCycleDataDirName, unstraferedFileName);
+			Serial.println(text);
+		}
+		Serial.flush();
+		processed=true;
+	}else if(command.startsWith("GetHistoricalRememberedValueData")){
+		//GetHistoricalLifeCycleData#12#1#19
+		int date = generalFunctions.getValue(command, '#', 1).toInt();
+		int month = generalFunctions.getValue(command, '#', 2).toInt();
+		int year = generalFunctions.getValue(command, '#', 3).toInt();
+		boolean result  = true;//sdCardManager.getHistoricalData( RememberedValueDataDirName,  date,  month,  year);
+		if (result) {
+			Serial.println("Ok-GetHistoricalRememberedValueData");
+		}else {
+			char text[44];
+			snprintf(text, sizeof text, "Failure-error opening %s/%s", RememberedValueDataDirName, unstraferedFileName);
+
+			Serial.println(text);
+		}
+		Serial.flush();
+		processed=true;
+	}else if (command == "AsyncData" ){
+		Serial.println("Ok-No Data");
+		Serial.flush();
+		processed=true;
+	}else if (command.startsWith("FaultData") ){
+		//Serial.println(faultData);
+		if(faultData=="Enter WPS"){
+
+			Serial.print("Fault#WPS Alert#Enter WPS#");
+			Serial.print(secretManager.generateCode());
+
+			Serial.print("#@On Load:Notify And Shutdown:Voltage At WPS#");
+			Serial.println(batteryVoltage);
+			waitingForWPSConfirmation=true;
+
+		}else{
+			Serial.println("Ok");
+		}
+
+		Serial.flush();
+		faultData="";
+		delay(delayTime);
+		processed=true;
+	}else if (command.startsWith("UserCommand") ){
+		//
+		// this function is not used in Ra2
+		// because Ra2 has no buttons
+		// but in the case that a teleonome does have
+		//human interface buttons connected to the microcontrller
+		// or there is a timer, here is where it will
+		Serial.println("Ok-UserCommand");
+		Serial.flush();
+		delay(delayTime);
+		processed=true;
+	}else if (command.startsWith("TimerStatus") ){
+		//
+		// this function is not used in Ra2
+		// because Ra2 has no btimers
+		// but in the case that a teleonome does have
+		//human interface buttons connected to the microcontrller
+		// or there is a timer, here is where it will be
+		Serial.println("Ok-TimerStatus");
+		Serial.flush();
+		delay(delayTime);
+		processed=true;
+
+	}
+	return processed;
+}
 
 void setup() {
 	// put your setup code here, to run once:
@@ -984,10 +1364,10 @@ void setup() {
 
 void loop() {
 
-//	if(!powerSupplyOn){
-//		digitalWrite(PI_POWER_PIN, HIGH);
-//		powerSupplyOn=true;
-//	}
+	//	if(!powerSupplyOn){
+	//		digitalWrite(PI_POWER_PIN, HIGH);
+	//		powerSupplyOn=true;
+	//	}
 
 
 
@@ -1236,405 +1616,54 @@ void loop() {
 		command = Serial.readString();
 		lcd.setCursor(0, 0);
 		lcd.print(command);
+		boolean commandProcessed = processDefaultCommands( command, batteryVoltage);
+		if(!commandProcessed){
+			if (command.startsWith("UpdateTeleonomeStatus")){
+				int id = generalFunctions.getValue(command, '#', 1).toInt();
+				String statusValue = generalFunctions.getValue(command, '#', 2);
+				String info = generalFunctions.getValue(command, '#', 3);
+				ledStatusLine2[id]=info;
 
-		if(command=="TestWPSSensor"){
-			float batteryVoltage = getBatteryVoltage();
-			float current = calculateCurrent();
-			int stateOfCharge= generalFunctions.getStateOfCharge(batteryVoltage);
-			boolean result = true;//sdCardManager.testWPSSensor( batteryVoltage,  current,  stateOfCharge,  operatingStatus);
-			if(result){
-				Serial.println("Ok-TestWPSSensor");
-			}else{
-				Serial.println("Failure-TestWPSSensor");
-			}
-			Serial.flush();
-
-		}else if(command=="TestLifeCycle"){
-			long now = timeManager.getCurrentTimeInSeconds();
-			//sdCardManager.storeLifeCycleEvent(now, LIFE_CYCLE_EVENT_END_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
-			Serial.println("Ok-TestLifeCycle");
-			Serial.flush();
-
-		}else if(command=="ListFiles"){
-			Serial.println(" ");
-			Serial.println(" ");
-			Serial.println(sensorDirName);
-			float total = 0.0;//sdCardListFiles();
-
-
-			Serial.println(" ");
-
-			Serial.print("Used (Kb):  ");
-			Serial.println(total);
-
-			Serial.println("");
-			Serial.println("Ok-ListFiles");
-			Serial.flush();
-		}else if(command=="Ping"){
-
-			Serial.println("Ok-Ping");
-			Serial.flush();
-
-		}else if(command.startsWith("SetTime")){
-
-			if(capacitorVoltage==0){
-				//
-				// we are in normal operation
-				//
-				Serial.println("Failure-SetTime");
-				Serial.flush();
-			}else{
-				boolean result = timeManager.setTime(command);
-				if(result){
-					Serial.println("Ok-SetTime");
-				}else{
-					Serial.println("Failure-SetTime");
+				if(statusValue=="success"){
+					leds.setColorRGB(id, 0, 255, 0);
+				}else  if(statusValue=="warning"){
+					leds.setColorRGB(id, 255, 255, 0);
+				}else  if(statusValue=="danger"){
+					leds.setColorRGB(id, 255, 0, 0);
+				}else  if(statusValue=="primary"){
+					leds.setColorRGB(id, 0, 0, 255);
+				}else  if(statusValue=="crisis"){
+					leds.setColorRGB(id, 255, 165, 0);
+				}else  if(statusValue=="off"){
+					leds.setColorRGB(id, 0, 0, 0);
+				}else  if(statusValue=="stale"){
+					leds.setColorRGB(id, 148, 0, 211);
 				}
-
-				Serial.flush();
-			}
-
-		}else if(command.startsWith("GetTime")){
-			String time = timeManager.getCurrentDateTimeForDisplay();
-			Serial.println(time);
-			Serial.flush();
-			Serial.println("Ok-GetTime");
-			Serial.flush();
-		}else if(command.startsWith("VerifyUserCode")){
-			String codeInString = generalFunctions.getValue(command, '#', 1);
-			long userCode = codeInString.toInt();
-			boolean validCode = secretManager.checkCode( userCode);
-			String result="Failure-Invalid Code";
-			if(validCode)result="Ok-Valid Code";
-			Serial.println(result);
-			Serial.flush();
-			delay(delayTime);
-		}else if(command.startsWith("GetCommandCodeGenerationTime")){
-
-			long secOrig =timeManager.getTimeForCodeGeneration();
-
-			Serial.print("secOrig=");
-			Serial.println(secOrig);
-			Serial.flush();
-				char secretCode[SHARED_SECRET_LENGTH];
-				secretManager.readSecret(secretCode);
-				Serial.print("secretCode=");
-							Serial.println(secretCode);
-							Serial.flush();
-
-				TOTP totp = TOTP(secretCode);
-				long code=totp. gen_code  (secOrig ) ;
-
-
-			//long code =secretManager.generateCode();
-			Serial.print("code=");
-						Serial.println(code);
-			Serial.println("Ok-GetCommandCodeGenerationTime");
-			Serial.flush();
-			delay(delayTime);
-		}else if(command.startsWith("GetCommandCode")){
-
-			long code =secretManager.generateCode();
-			//
-			// patch a bug in the totp library
-			// if the first digit is a zero, it
-			// returns a 5 digit number
-			if(code<100000){
-				Serial.print("0");
-				Serial.println(code);
-			}else{
-				Serial.println(code);
-			}
-			Serial.flush();
-			delay(delayTime);
-		}else if(command.startsWith("GetSecret")){
-			if(capacitorVoltage==0){
-				//
-				// we are in normal operation
-				//
-				Serial.println("Failure-GetSecret");
-				Serial.flush();
-			}else{
-				char secretCode[SHARED_SECRET_LENGTH];
-				secretManager.readSecret(secretCode);
-				Serial.println(secretCode);
-				Serial.println("Ok-GetSecret");
+				Serial.println("UpdateTeleonomeStatus");
 				Serial.flush();
 				delay(delayTime);
-			}
-
-
-		} else if(command.startsWith("SetSecret")){
-			if(capacitorVoltage==0){
-				//
-				// we are in normal operation
-				//
-				Serial.println("Failure-SetSecret");
-				Serial.flush();
 			}else{
-				String secret = generalFunctions.getValue(command, '#', 1);
-				int numberDigits = generalFunctions.getValue(command, '#', 2).toInt();
-				int periodSeconds = generalFunctions.getValue(command, '#', 3).toInt();
-				secretManager.saveSecret(secret, numberDigits, periodSeconds);
-
-				Serial.println("Ok-SetSecret");
+				//
+				// call read to flush the incoming
+				//
+				Serial.read();
+				Serial.println("Failure-Bad Command " + command);
 				Serial.flush();
 			}
-			delay(delayTime);
-		}else if(command.startsWith("PulseStart")){
-			inPulse=true;
-			pulseStartTime = generalFunctions.getValue(command, '#', 1);
-			Serial.println("Ok-PulseStart");
-			Serial.flush();
-			lcd.clear();
-			lcd.setRGB(255,0,0);
-
-		}else if(command.startsWith("PulseFinished")){
-			pulseStopTime = generalFunctions.getValue(command, '#', 1);
-			inPulse=false;
-			Serial.println("Ok-PulseFinished");
-			Serial.flush();
-			lcd.clear();
-			lcd.setRGB(255,255,255);
-
-
-
-		}else if(command.startsWith("IPAddr")){
-			currentIpAddress = generalFunctions.getValue(command, '#', 1);
-			Serial.println("Ok-IPAddr");
-			Serial.flush();
-			delay(delayTime);
-		}else if(command.startsWith("SSID")){
-			currentSSID = generalFunctions.getValue(command, '#', 1);
-			Serial.println("Ok-currentSSID");
-			Serial.flush();
-			delay(delayTime);
-		}else if(command.startsWith("HostMode")  ){
-			Serial.println("Ok-HostMode");
-			Serial.flush();
-			delay(delayTime);
-			isHost=true;
-
-		}else if(command.startsWith("NetworkMode")   ){
-			Serial.println("Ok-NetworkMode");
-			Serial.flush();
-			delay(delayTime);
-			isHost=false;
-
-		}else if(command.startsWith("GetSensorData")){
-			Serial.println(toReturn);
-			Serial.flush();
-		}else if (command.startsWith("UpdateTeleonomeStatus")){
-			int id = generalFunctions.getValue(command, '#', 1).toInt();
-			String statusValue = generalFunctions.getValue(command, '#', 2);
-			String info = generalFunctions.getValue(command, '#', 3);
-			ledStatusLine2[id]=info;
-
-			if(statusValue=="success"){
-				leds.setColorRGB(id, 0, 255, 0);
-			}else  if(statusValue=="warning"){
-				leds.setColorRGB(id, 255, 255, 0);
-			}else  if(statusValue=="danger"){
-				leds.setColorRGB(id, 255, 0, 0);
-			}else  if(statusValue=="primary"){
-				leds.setColorRGB(id, 0, 0, 255);
-			}else  if(statusValue=="crisis"){
-				leds.setColorRGB(id, 255, 165, 0);
-			}else  if(statusValue=="off"){
-				leds.setColorRGB(id, 0, 0, 0);
-			}else  if(statusValue=="stale"){
-				leds.setColorRGB(id, 148, 0, 211);
-			}
-			Serial.println("UpdateTeleonomeStatus");
-			Serial.flush();
-			delay(delayTime);
-		}else if(command.startsWith("EnterWPS")){
-			//EnterWPS#10#45#30#1
-			secondsToTurnPowerOff = (long)generalFunctions.getValue(command, '#', 1).toInt();
-			secondsToNextPiOn = (long)generalFunctions.getValue(command, '#', 2).toInt();
-			wpsPulseFrequencySeconds = generalFunctions.getValue(command, '#', 3).toInt();
-			int pauseDuringWPSi = generalFunctions.getValue(command, '#', 4).toInt();
-			if(pauseDuringWPSi==1)pauseDuringWPS=true;
-			else pauseDuringWPS=false;
-			waitingForWPSConfirmation=false;
-			wpsCountdown=true;
-			operatingStatus="WPS";
-			wpsCountDownStartSeconds= timeManager.getCurrentTimeInSeconds();
-			currentSecondsToPowerOff=0L;
-
-			Serial.println("Ok-EnterWPS");
-			Serial.flush();
-		}else if(command.startsWith("ExitWPS")){
-
-			Serial.println("Ok-ExitWPS");
-			Serial.flush();
-			inWPS=false;
-			operatingStatus="Normal";
-			currentSecondsToPowerOff=0L;
-			wpsCountdown=false;
-
-		}else if(command.startsWith("UpdateWPSParameters")){
-			String minWPSVoltageS = generalFunctions.getValue(command, '#', 1);
-			char buffer[10];
-			minWPSVoltageS.toCharArray(buffer, 10);
-			minWPSVoltage = atof(buffer);
-
-			minWPSVoltage = generalFunctions.stringToFloat(generalFunctions.getValue(command, '#', 1));
-			enterWPSVoltage = generalFunctions.stringToFloat(generalFunctions.getValue(command, '#', 2));
-			exitWPSVoltage = generalFunctions.stringToFloat(generalFunctions.getValue(command, '#', 3));
-
-			secondsToForcedWPS = generalFunctions.getValue(command, '#', 4).toInt();
-			Serial.println("Ok-UpdateWPSParameters");
-			Serial.flush();
-
-
-
-		}else if(command.startsWith("GetRememberedValueData")){
-			//GetRememberedValueData#0
-			int transferData = generalFunctions.getValue(command, '#', 1).toInt();
-			boolean result = true;//sdCardManager.readUntransferredFileFromSDCard( transferData,true, RememberedValueDataDirName);
-			if(result){
-				Serial.println("Ok-GetRememberedValueData");
-			}else {
-				char text[44];
-				snprintf(text, sizeof text, "Failure-error opening %s/%s", remFileName, unstraferedFileName);
-				Serial.println(text);
-			}
-			Serial.flush();
-		}else if(command.startsWith("GetLifeCycleData")){
-			//GetLifeCycleData#0
-			int transferData = generalFunctions.getValue(command, '#', 1).toInt();
-			boolean result = true;//sdCardManager.readUntransferredFileFromSDCard( transferData,true, LifeCycleDataDirName);
-			if(result){
-				Serial.println("Ok-GetLifeCycleData");
-			}else {
-				char text[44];
-				snprintf(text, sizeof text, "Failure-error opening %s/%s", LifeCycleDataDirName, unstraferedFileName);
-				Serial.println(text);
-			}
-			Serial.flush();
-		}else if(command.startsWith("GetWPSSensorData")){
-			//GetWPSSensorData#0
-			//GetLifeCycleData#0
-			int transferData = generalFunctions.getValue(command, '#', 1).toInt();
-			boolean result = true;//sdCardManager.readUntransferredFileFromSDCard( transferData,true, WPSSensorDataDirName);
-			if(result){
-				Serial.println("Ok-GetWPSSensorData");
-			}else {
-
-				char text[44];
-				snprintf(text, sizeof text, "Failure-error opening /%s/%s", WPSSensorDataDirName, unstraferedFileName);
-				Serial.println(text);
-
-			}
-			Serial.flush();
-
-		}else if(command.startsWith("GetHistoricalWPSSensorData")){
-
-			int date = generalFunctions.getValue(command, '#', 1).toInt();
-			int month = generalFunctions.getValue(command, '#', 2).toInt();
-			int year = generalFunctions.getValue(command, '#', 3).toInt();
-			boolean result  = true;//sdCardManager.getHistoricalData( WPSSensorDataDirName,  date,  month,  year);
-			if(result){
-				Serial.println("Ok-GetWPSSensorDataHistory");
-			}else {
-				char text[44];
-				snprintf(text, sizeof text, "Failure-error opening %s/%s", WPSSensorDataDirName, unstraferedFileName);
-
-				Serial.println(text);
-			}
-			Serial.flush();
-		}else if(command.startsWith("GetHistoricalLifeCycleData")){
-			//GetHistoricalLifeCycleData#12#1#19
-			int date = generalFunctions.getValue(command, '#', 1).toInt();
-			int month = generalFunctions.getValue(command, '#', 2).toInt();
-			int year = generalFunctions.getValue(command, '#', 3).toInt();
-			boolean result  = true;//sdCardManager.getHistoricalData( LifeCycleDataDirName,  date,  month,  year);
-			if (result) {
-				Serial.println("Ok-GetHistoricalLifeCycleData");
-			}else {
-				char text[44];
-				snprintf(text, sizeof text, "Failure-error opening %s/%s", LifeCycleDataDirName, unstraferedFileName);
-				Serial.println(text);
-			}
-			Serial.flush();
-		}else if(command.startsWith("GetHistoricalRememberedValueData")){
-			//GetHistoricalLifeCycleData#12#1#19
-			int date = generalFunctions.getValue(command, '#', 1).toInt();
-			int month = generalFunctions.getValue(command, '#', 2).toInt();
-			int year = generalFunctions.getValue(command, '#', 3).toInt();
-			boolean result  = true;//sdCardManager.getHistoricalData( RememberedValueDataDirName,  date,  month,  year);
-			if (result) {
-				Serial.println("Ok-GetHistoricalRememberedValueData");
-			}else {
-				char text[44];
-				snprintf(text, sizeof text, "Failure-error opening %s/%s", RememberedValueDataDirName, unstraferedFileName);
-
-				Serial.println(text);
-			}
-			Serial.flush();
-		}else if (command == "AsyncData" ){
-			Serial.println("Ok-No Data");
-			Serial.flush();
-		}else if (command.startsWith("FaultData") ){
-			//Serial.println(faultData);
-			if(faultData=="Enter WPS"){
-
-				Serial.print("Fault#WPS Alert#Enter WPS#");
-				Serial.print(secretManager.generateCode());
-
-				Serial.print("#@On Load:Notify And Shutdown:Voltage At WPS#");
-				Serial.println(batteryVoltage);
-				waitingForWPSConfirmation=true;
-
-			}else{
-				Serial.println("Ok");
-			}
-
-			Serial.flush();
-			faultData="";
-			delay(delayTime);
-		}else if (command.startsWith("UserCommand") ){
-			//
-			// this function is not used in Ra2
-			// because Ra2 has no buttons
-			// but in the case that a teleonome does have
-			//human interface buttons connected to the microcontrller
-			// or there is a timer, here is where it will
-			Serial.println("Ok-UserCommand");
-			Serial.flush();
-			delay(delayTime);
-
-		}else if (command.startsWith("TimerStatus") ){
-			//
-			// this function is not used in Ra2
-			// because Ra2 has no btimers
-			// but in the case that a teleonome does have
-			//human interface buttons connected to the microcontrller
-			// or there is a timer, here is where it will be
-			Serial.println("Ok-TimerStatus");
-			Serial.flush();
-			delay(delayTime);
-
-		}else{
-			//
-			// call read to flush the incoming
-			//
-			Serial.read();
-			Serial.println("Failure-Bad Command " + command);
-			Serial.flush();
 		}
 	}
 	//
-		// this is the end of the loop, to calculate the energy spent on this loop
-		// take the time substract the time at the beginning of the loop (the now variable defined above)
-		// and also substract the seconds spent in powerdownMode
-		// finally add the poweredDownInLoopSeconds to the daily total
+	// this is the end of the loop, to calculate the energy spent on this loop
+	// take the time substract the time at the beginning of the loop (the now variable defined above)
+	// and also substract the seconds spent in powerdownMode
+	// finally add the poweredDownInLoopSeconds to the daily total
 
-		int loopConsumingPowerSeconds = timeManager.getCurrentTimeInSeconds()-now -poweredDownInLoopSeconds;
-		dailyBatteryOutEnergy+= loopConsumingPowerSeconds*currentValue/3600;
-		hourlyBatteryOutEnergy+= loopConsumingPowerSeconds*currentValue/3600;
-		dailyPoweredDownInLoopSeconds+=poweredDownInLoopSeconds;
-		hourlyPoweredDownInLoopSeconds+=poweredDownInLoopSeconds;
+	int loopConsumingPowerSeconds = timeManager.getCurrentTimeInSeconds()-now -poweredDownInLoopSeconds;
+	dailyBatteryOutEnergy+= loopConsumingPowerSeconds*currentValue/3600;
+	hourlyBatteryOutEnergy+= loopConsumingPowerSeconds*currentValue/3600;
+	dailyPoweredDownInLoopSeconds+=poweredDownInLoopSeconds;
+	hourlyPoweredDownInLoopSeconds+=poweredDownInLoopSeconds;
 
 }
+
+
