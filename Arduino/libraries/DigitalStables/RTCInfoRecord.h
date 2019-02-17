@@ -1,13 +1,14 @@
  #ifndef  RTCINFORECORD_H
  #define RTCINFORECORD_H
+#include <stdint.h>
 struct RTCInfoRecord{
 
-		int year;
-		int month;
-		int date;
-		int hour;
-		int minute;
-		int second;
+	uint8_t year;
+		uint8_t month;
+		uint8_t date;
+		uint8_t hour;
+		uint8_t minute;
+		uint8_t second;
 
 };
 #endif

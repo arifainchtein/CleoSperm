@@ -95,15 +95,10 @@ long TimeManager::dateAsSeconds(uint8_t year, uint8_t month, uint8_t date, uint8
 	if(year < 69){
 		year+= 2000;
 	}
-	_HardSerial.println("in tm y=");
-	_HardSerial.println(year);
-	_HardSerial.flush();
 
 	// seconds from 1970 till 1 jan 00:00:00 this year
 	long seconds= (year-1970)*(60*60*24L*365);
-_HardSerial.println("in tm p1=");
-_HardSerial.println(seconds);
-_HardSerial.flush();
+
 	// add extra days for leap years
 	for (i=1970; i<year; i++) {
 		if (LEAP_YEAR(i)) {
@@ -118,22 +113,12 @@ _HardSerial.flush();
 			seconds+= 60*60*24L*monthDays[i];
 		}
 	}
-	_HardSerial.println("in tm p2=");
-	_HardSerial.println(seconds);
-	_HardSerial.flush();
 
 	seconds+= (date-1)*3600*24L;
-	_HardSerial.println("in tm p3=");
-	_HardSerial.println(seconds);
-	_HardSerial.flush();
 	seconds+= hour*3600L;
 	seconds+= minute*60L;
 	seconds -=  timeZoneHours*3600L;
-	_HardSerial.println("in tm p4=");
-	_HardSerial.println(seconds);
-	_HardSerial.flush();
 	seconds+=second;
-
 	return seconds;
 }
 
@@ -183,11 +168,12 @@ String TimeManager::getCurrentDateForDisplay(){
 
 
 long TimeManager::getTimeForCodeGeneration(){
-	rtc.read();
+
 	RTCInfoRecord anRTCInfoRecord =getCurrentDateTime();
 	uint8_t seconds = anRTCInfoRecord.second+SECONDOFFSET;
 	uint8_t month = anRTCInfoRecord.month-1;
 	uint8_t year = anRTCInfoRecord.year;
+
 
 	//uint8_t date = rtc.day;
 	//uint8_t hour = rtc.hour;
