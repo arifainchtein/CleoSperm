@@ -10,11 +10,11 @@
 #include <Arduino.h>
 
 //#include <GravityRtc.h>
-#include "libraries/GravityRtc/GravityRtc.h"
+#include "/home/pi/Teleonome/Arduino/libraries/GravityRtc/GravityRtc.h"
+#include "/home/pi/Teleonome/Arduino/libraries/RTCInfoRecord/RTCInfoRecord.h"
 
 #include <GeneralFunctions.h>
-#include <RTCInfoRecord>
-
+\
 class TimeManager{
 	HardwareSerial& _HardSerial;
 	GeneralFunctions& generalFunctions;

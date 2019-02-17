@@ -271,41 +271,7 @@ void yearlyTasks(long time){
 
 }
 
-long getCurrentTimeInSeconds(){
-	DateTime dateTimeNow = timeManager.getCurrentDateTime();
-	long now = timeManager.getCurrentTimeInSeconds();
-	if (currentHour !=dateTimeNow.hour()) {
-		//
-		// we are in a new hour,
-		int previousHour=currentHour;
-		//
-		// now reset
-		currentHour = dateTimeNow.hour();
-		hourlyTasks(now,previousHour);
-	}
-	if (currentDay != dateTimeNow.day()) {
-		//
-		// we are in a new day, so get yesterdays day, month and year
-		int yesterdayDate=currentDay;
-		int yesterdayMonth=currentMonth;
-		int yesterdayYear=currentYear;
-		//
-		// now reset
-		currentDay = dateTimeNow.day();
-		dailyTasks(now,yesterdayDate, yesterdayMonth, yesterdayYear );
-	}
 
-	if (currentMonth !=dateTimeNow.month()) {
-		currentMonth=dateTimeNow.month();
-		monthlyTasks(now);
-	}
-
-	if (currentYear !=dateTimeNow.year()) {
-		currentYear=dateTimeNow.year();
-		yearlyTasks(now);
-	}
-	return now;
-}
 
 float calculateCurrent(){
 	int sensorValue;             //value read from the sensor
@@ -408,7 +374,7 @@ void enterArduinoSleep(void)
 	wdt_reset();
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);   /* EDIT: could also use SLEEP_MODE_PWR_DOWN for lowest power consumption. */
 	//sleep_enable();
-	long currentSleepSeconds = getCurrentTimeInSeconds();
+	long currentSleepSeconds = timeManager.getCurrentTimeInSeconds();
 	/* Now enter sleep mode. */
 	sleep_mode();
 
@@ -419,12 +385,12 @@ void enterArduinoSleep(void)
 	// the min for wps then go into wps,
 	// otherwise go back to comma
 	//
-	long lastSleepSeconds = getCurrentTimeInSeconds()-currentSleepSeconds ;
+	long lastSleepSeconds = timeManager.getCurrentTimeInSeconds()-currentSleepSeconds ;
 	poweredDownInLoopSeconds+=lastSleepSeconds;
 	float batteryVoltage = getBatteryVoltage();
 	if(batteryVoltage>minWPSVoltage){
 		// STORE a lifecycle comma exit record
-		long now = getCurrentTimeInSeconds();
+		long now = timeManager.getCurrentTimeInSeconds();
 		//sdCardManager.storeLifeCycleEvent(now, LIFE_CYCLE_EVENT_END_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
 		lcd.display();
 		lcd.setRGB(255,255,0);
@@ -481,7 +447,7 @@ void pauseWPS(void)
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);   /* EDIT: could also use SLEEP_MODE_PWR_DOWN for lowest power consumption. */
 	sleep_enable();
 
-	long currentSleepSeconds = getCurrentTimeInSeconds();
+	long currentSleepSeconds = timeManager.getCurrentTimeInSeconds();
 	/* Now enter sleep mode. */
 	sleep_mode();
 
@@ -492,7 +458,7 @@ void pauseWPS(void)
 	// the min for wps then go into wps,
 	// otherwise go back to comma
 	//
-	long lastSleepSeconds = getCurrentTimeInSeconds()-currentSleepSeconds ;
+	long lastSleepSeconds = timeManager.getCurrentTimeInSeconds()-currentSleepSeconds ;
 	poweredDownInLoopSeconds+=lastSleepSeconds;
 
 	lcd.display();
@@ -519,7 +485,7 @@ void sendWPSAlert(long time, char *faultData, int batteryVoltage){
 	wpsCountdown=false;
 	inWPS=true;
 	operatingStatus="WPS";
-	wpsAlertTime=getCurrentTimeInSeconds();
+	wpsAlertTime=timeManager.getCurrentTimeInSeconds();
 	//sdCardManager.storeRememberedValue(time,faultData, batteryVoltage, UNIT_VOLT);
 }
 
@@ -685,7 +651,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 					lcd.clear();
 					lcd.display();
 
-					lastWPSRecordSeconds = getCurrentTimeInSeconds();
+					lastWPSRecordSeconds = timeManager.getCurrentTimeInSeconds();
 					WPSSensorRecord anWPSSensorRecord;
 					anWPSSensorRecord.batteryVoltage= getBatteryVoltage();
 					anWPSSensorRecord.current = calculateCurrent();
@@ -824,7 +790,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 						lcd.clear();
 						lcd.display();
 
-						lastWPSRecordSeconds = getCurrentTimeInSeconds();
+						lastWPSRecordSeconds = timeManager.getCurrentTimeInSeconds();
 						WPSSensorRecord anWPSSensorRecord;
 						anWPSSensorRecord.batteryVoltage= getBatteryVoltage();
 						anWPSSensorRecord.current = calculateCurrent();
@@ -1268,7 +1234,7 @@ void loop() {
 	//lcd.clear();
 	//lcd.setCursor(0, 0);
 
-	long now = getCurrentTimeInSeconds();
+	long now = timeManager.getCurrentTimeInSeconds();
 	poweredDownInLoopSeconds=0;
 	defineState(now,  batteryVoltage, internalBatteryStateOfCharge, currentValue, piIsOn);
 
@@ -1293,7 +1259,7 @@ void loop() {
 			Serial.flush();
 
 		}else if(command=="TestLifeCycle"){
-			long now = getCurrentTimeInSeconds();
+			long now = timeManager.getCurrentTimeInSeconds();
 			//sdCardManager.storeLifeCycleEvent(now, LIFE_CYCLE_EVENT_END_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
 			Serial.println("Ok-TestLifeCycle");
 			Serial.flush();
@@ -1482,7 +1448,7 @@ void loop() {
 			waitingForWPSConfirmation=false;
 			wpsCountdown=true;
 			operatingStatus="WPS";
-			wpsCountDownStartSeconds= getCurrentTimeInSeconds();
+			wpsCountDownStartSeconds= timeManager.getCurrentTimeInSeconds();
 			currentSecondsToPowerOff=0L;
 
 			Serial.println("Ok-EnterWPS");

@@ -6,10 +6,12 @@
  */
 #include "Arduino.h"
 #include <TimeManager.h>
-#include <RTCInfoRecord>
+#include "/home/pi/Teleonome/Arduino/libraries/GravityRtc/GravityRtc.h"
+#include "/home/pi/Teleonome/Arduino/libraries/RTCInfoRecord/RTCInfoRecord.h"
+
 #include <Wire.h>
 //#include <GravityRtc.h>
-#include "libraries/GravityRtc/GravityRtc.h"
+
 #include <GeneralFunctions.h>
 
 #define LEAP_YEAR(_year) ((_year%4)==0)
