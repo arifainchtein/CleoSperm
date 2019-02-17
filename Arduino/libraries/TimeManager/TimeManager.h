@@ -39,7 +39,7 @@ class TimeManager{
 		//
 		boolean printTimeToSerial();
 		boolean setTime(String);
-		RTCInfoRecord getCurrentDateTime();
+
 
 	private:
 
