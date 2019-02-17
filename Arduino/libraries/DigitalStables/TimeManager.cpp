@@ -92,10 +92,15 @@ long TimeManager::dateAsSeconds(uint8_t year, uint8_t month, uint8_t date, uint8
 	int i;
 	long seconds;
 
-	if(year < 69)
+	if(year < 69){
 		year+= 2000;
+	}
+	_HardSerial.println("in tm y=");
+	_HardSerial.println(year);
+	_HardSerial.flush();
+
 	// seconds from 1970 till 1 jan 00:00:00 this year
-	seconds= (year-1970)*(60*60*24L*365);
+	long seconds= (year-1970)*(60*60*24L*365);
 _HardSerial.println("in tm p1=");
 _HardSerial.println(seconds);
 _HardSerial.flush();
