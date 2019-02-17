@@ -4,7 +4,6 @@
 #include <totp.h>
 #include <TimeManager.h>
 
- int SHARED_SECRET_LENGTH=23;
 
 SecretManager::SecretManager(TimeManager& t): timeManager(t){
 
