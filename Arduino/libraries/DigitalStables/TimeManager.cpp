@@ -90,7 +90,7 @@ long TimeManager::dateAsSeconds(uint8_t year, uint8_t month, uint8_t date, uint8
 	// note year argument is full four digit year (or digits since 2000), i.e.1975, (year 8 is 2008
 
 	int i;
-	long seconds;
+
 
 	if(year < 69){
 		year+= 2000;
