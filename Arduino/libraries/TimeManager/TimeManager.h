@@ -8,8 +8,9 @@
 #ifndef TIMEMANAGER_H_
 #define TIMEMANAGER_H_
 #include <Arduino.h>
-#include <RTClib.h>
+#include <GravityRtc.h>
 #include <GeneralFunctions.h>
+#include <RTCInfoRecord>
 
 class TimeManager{
 	HardwareSerial& _HardSerial;
@@ -25,7 +26,7 @@ class TimeManager{
 		void yearlyTasks(long time);
 		long getCurrentTimeInSeconds();
 		String getElapsedTimeHoursMinutesSecondsString(long elapsedTime);
-		DateTime getCurrentDateTime();
+		RTCInfoRecord getCurrentDateTime();
 		long getTimeForCodeGeneration();
 		String getCurrentTimeForDisplay();
 		String getCurrentDateTimeForDisplay();
@@ -35,11 +36,11 @@ class TimeManager{
 		//
 		boolean printTimeToSerial();
 		boolean setTime(String);
+		RTCInfoRecord getCurrentDateTime();
 
 	private:
 
-		RTC_DS1307 RTC;
-		DateTime now;
+
 		int chipSelect = 10;
 		int timeZoneHours=11;
 		int SECONDOFFSET=10;

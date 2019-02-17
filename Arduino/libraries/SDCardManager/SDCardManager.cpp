@@ -12,9 +12,10 @@
 #include <SDCardManager.h>
 #include <GeneralFunctions.h>
 #include <TimeManager.h>
-#include <RTClib.h>
+#include <GravityRtc.h>
 #include <WPSSensorRecord.h>
-
+#include <RTCInfoRecord>
+#define SD_PIN 53
 extern rgb_lcd lcd;
 extern char sensorDirName[10];
 extern char lifeCycleFileName[10];
@@ -37,19 +38,54 @@ extern char remFileName[10];
 //	HardwareSerial& _HardSerial;
 
 SDCardManager::SDCardManager(TimeManager& t, GeneralFunctions& f,HardwareSerial& serial ): timeManager(t), generalFunctions(f), _HardSerial(serial)
-{
+{}
+
+boolean SDCardManager::start(){
 	//setup SD card
 	_HardSerial.print("Initializing SD card...");
 
-	// see if the SD card is present and can be initialized:
-	if (!SD.begin(chipSelect)) {
-		_HardSerial.println("Card failed, or not present");
-		// don't do anything more:
-		return;
-	}
-	_HardSerial.println("card initialized.");
+	if (!SD.begin(SD_PIN)) {
+			Serial.println("No SD-card.");
+			lcd.setCursor(0, 0);
+			lcd.print("No SD-card.") ;
+			return;
+		}else{
+			// Check dir for db files
+			if (!SD.exists(sensorDirName )) {
+				Serial.println("wpsSensorData Dir does not exist, creating...");
+				SD.mkdir(sensorDirName);
+			}
+			if (!SD.exists(lifeCycleFileName)) {
+				SD.mkdir(lifeCycleFileName);
+			}
+			if (!SD.exists(remFileName)) {
+				SD.mkdir(remFileName);
+			}
+			File sensorFile = SD.open(sensorDirName );
+			long totalDiskUse=getSDCardDiskUse(sensorFile);
+
+			File lifeCycleFile = SD.open(lifeCycleFileName );
+			totalDiskUse+=getSDCardDiskUse(lifeCycleFile);
+
+			File rememberedValueFile = SD.open(remFileName );
+			totalDiskUse+=getSDCardDiskUse(rememberedValueFile);
+
+			sensorFile.close();
+			lifeCycleFile.close();
+			rememberedValueFile.close();
+
+			lcd.setCursor(0, 0);
+			lcd.print("Finish Init") ;
+			lcd.setCursor(0, 1);
+			lcd.print("SD use ") ;
+			lcd.print(totalDiskUse/1024) ;
+			lcd.print("Kb") ;
 
 
+			_HardSerial.println("card initialized.");
+			return true;
+
+		}
 }
 
 //
@@ -150,10 +186,10 @@ boolean SDCardManager::readUntransferredFileFromSDCardByDate(int moveData, boole
 }
 
 boolean SDCardManager::readUntransferredFileFromSDCard(int moveData, boolean sendToSerial, const char *dirName){
-	DateTime now = timeManager.getCurrentDateTime();
-	int year = now.year()-2000;
-	int month = now.month()-1;
-	return readUntransferredFileFromSDCardByDate( moveData,  sendToSerial,  dirName,  now.day(),  month,  year);
+	RTCInfoRecord anRTCInfoRecord = timeManager.getCurrentDateTime();
+		int year = anRTCInfoRecord.year-2000;
+		int month = anRTCInfoRecord.month-1;
+	return readUntransferredFileFromSDCardByDate( moveData,  sendToSerial,  dirName,  anRTCInfoRecord.date,  month,  year);
 }
 
 

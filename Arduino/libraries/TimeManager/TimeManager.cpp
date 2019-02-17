@@ -6,19 +6,18 @@
  */
 #include "Arduino.h"
 #include <TimeManager.h>
+#include <RTCInfoRecord>
 #include <Wire.h>
-#include <RTClib.h>
+#include <GravityRtc.h>
 #include <GeneralFunctions.h>
 
 #define LEAP_YEAR(_year) ((_year%4)==0)
-RTC_DS1307 RTC;
-DateTime now;
+
 const int chipSelect = 10; //cs or the save select pin from the sd shield is connected to 10.
 int timeZoneHours=11;
 int SECONDOFFSET=10;
 static  byte monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
-#define DS1307_ADDRESS 0x62
-byte zero = 0x00;
+GravityRtc rtc;
 
 TimeManager::TimeManager(GeneralFunctions& g, HardwareSerial& serial):generalFunctions(g),  _HardSerial(serial){
 	Wire.begin();
@@ -37,48 +36,14 @@ byte TimeManager::decToBcd(byte val){
 
 
 boolean TimeManager::setTime(String command){
-	if (! RTC.isrunning()) {
-			_HardSerial.println("in set time-RTC is NOT running!");
-			_HardSerial.flush();
-			// following line sets the RTC to the date & time this sketch was compiled
-			// uncomment it & upload to set the time, date and start run the RTC!
-			RTC.adjust(DateTime(__DATE__, __TIME__));
-			_HardSerial.println("RTC set");
-	}
 	int date = generalFunctions.getValue(command, '#', 1).toInt();
 	int month = generalFunctions.getValue(command, '#', 2).toInt();
 	int year = generalFunctions.getValue(command, '#', 3).toInt();
-	int weekDay = generalFunctions.getValue(command, '#', 4).toInt();
+	int dw = generalFunctions.getValue(command, '#', 4).toInt();
 	int hour = generalFunctions.getValue(command, '#', 5).toInt();
 	int min = generalFunctions.getValue(command, '#', 6).toInt();
 	int sec = generalFunctions.getValue(command, '#', 7).toInt();
-	if(year>1999)year=year-2000;
-	_HardSerial.print("setting hour to:");
-	_HardSerial.println(hour);
-	_HardSerial.flush();
-
-	//	  byte second =      00; //0-59
-	//	  byte minute =      19; //0-59
-	//	  byte hour =        21; //0-23
-	//	  byte weekDay =     4; //1-7
-	//	  byte monthDay =    27; //1-31
-	//	  byte month =       10; //1-12
-	//	  byte year  =       12; //0-99
-
-	Wire.beginTransmission(DS1307_ADDRESS);
-	Wire.write(zero); //stop Oscillator
-
-	Wire.write(decToBcd(sec));
-	Wire.write(decToBcd(min));
-	Wire.write(decToBcd(hour));
-	Wire.write(decToBcd(weekDay));
-	Wire.write(decToBcd(date));
-	Wire.write(decToBcd(month));
-	Wire.write(decToBcd(year));
-
-	Wire.write(zero); //start
-
-	Wire.endTransmission();
+	rtc.adjustRtc(year,month,date,dw,hour,min,sec);
 
 
 
@@ -91,18 +56,19 @@ boolean TimeManager::setTime(String command){
 
 boolean TimeManager::printTimeToSerial(){
 
-	DateTime now = RTC.now();
-	_HardSerial.print(now.day());
-	_HardSerial.print("/");//month
-	_HardSerial.print(now.month());
-	_HardSerial.print("/");//month
-	_HardSerial.print(now.year());
-	_HardSerial.print(" ");//month
-	_HardSerial.print(now.hour());
+	rtc.read();
+	String displayTime =  "";
+	_HardSerial.print(rtc.day);
+	_HardSerial.print("/");
+	_HardSerial.print(rtc.month);
+	_HardSerial.print("/");
+	_HardSerial.print(rtc.year);
+	_HardSerial.print(" ");
+	_HardSerial.print(rtc.hour);
 	_HardSerial.print(":");
-	_HardSerial.print(now.minute());
+	_HardSerial.print(rtc.minute);
 	_HardSerial.print(":");
-	_HardSerial.println(now.second());
+	_HardSerial.print(rtc.second);;
 	_HardSerial.println("Ok-GetTime");
 	_HardSerial.flush();
 	return true;
@@ -113,19 +79,7 @@ boolean TimeManager::printTimeToSerial(){
 
 
 void TimeManager::start(){
-	RTC.begin();
-	//check or the Real Time Clock is on
-	if (! RTC.isrunning()) {
-		_HardSerial.println("RTC is NOT running!");
-		_HardSerial.flush();
-		// following line sets the RTC to the date & time this sketch was compiled
-		// uncomment it & upload to set the time, date and start run the RTC!
-		RTC.adjust(DateTime(__DATE__, __TIME__));
-		_HardSerial.println("Current time:");
-		_HardSerial.flush();
-		printTimeToSerial();
-
-	}
+	rtc.setup();
 	_HardSerial.println("Finished start");
 	_HardSerial.flush();
 }
@@ -169,42 +123,43 @@ long TimeManager::dateAsSeconds(uint8_t year, uint8_t month, uint8_t date, uint8
 }
 
 String TimeManager::getCurrentTimeForDisplay(){
-	DateTime now = RTC.now();
+	rtc.read();
 	String displayTime =  "";
-	displayTime.concat(now.hour());
+
+	displayTime.concat(rtc.hour);
 	displayTime.concat(":");
-	displayTime.concat(now.minute());
+	displayTime.concat(rtc.minute);
 	displayTime.concat(":");
-	displayTime.concat(now.second());
+	displayTime.concat(rtc.second);
 	return displayTime;
 }
 
 String TimeManager::getCurrentDateTimeForDisplay(){
-	DateTime now = RTC.now();
+	rtc.read();
 	String displayTime =  "";
-	displayTime.concat(now.day());
+	displayTime.concat(rtc.day);
 	displayTime.concat("/");
-	displayTime.concat(now.month());
+	displayTime.concat(rtc.month);
 	displayTime.concat("/");
-	displayTime.concat(now.year());
+	displayTime.concat(rtc.year);
 	displayTime.concat(" ");
-	displayTime.concat(now.hour());
+	displayTime.concat(rtc.hour);
 	displayTime.concat(":");
-	displayTime.concat(now.minute());
+	displayTime.concat(rtc.minute);
 	displayTime.concat(":");
-	displayTime.concat(now.second());
+	displayTime.concat(rtc.second);
 
 	return displayTime;
 }
 
 String TimeManager::getCurrentDateForDisplay(){
-	DateTime now = RTC.now();
+	rtc.read();
 	String displayTime =  "";
-	displayTime.concat(now.day());
+	displayTime.concat(rtc.day);
 	displayTime.concat("/");
-	displayTime.concat(now.month());
+	displayTime.concat(rtc.month);
 	displayTime.concat("/");
-	displayTime.concat(now.year());
+	displayTime.concat(rtc.year);
 
 	return displayTime;
 }
@@ -212,23 +167,33 @@ String TimeManager::getCurrentDateForDisplay(){
 
 long TimeManager::getTimeForCodeGeneration(){
 
-	DateTime now = RTC.now();
-	int seconds = now.second()+SECONDOFFSET;
-	int month = now.month()-1;
-	return dateAsSeconds(now.year(), month, now.day(), now.hour(), now.minute(), seconds);
+	rtc.read();
+	int seconds = rtc.second+SECONDOFFSET;
+	int month = rtc.month-1;
+	return dateAsSeconds(rtc.year, month, rtc.day, rtc.hour, rtc.minute, seconds);
 }
 
 
 
-DateTime TimeManager::getCurrentDateTime(){
-	return  RTC.now();
+RTCInfoRecord TimeManager::getCurrentDateTime(){
+	RTCInfoRecord aRTCInfoRecord;
+	rtc.read();
+	aRTCInfoRecord.date=rtc.day;
+	aRTCInfoRecord.month=rtc.month;
+	aRTCInfoRecord.year=rtc.year;
+	aRTCInfoRecord.hour=rtc.hour;
+	aRTCInfoRecord.minute=rtc.minute;
+	aRTCInfoRecord.second=rtc.second;
+
+	return aRTCInfoRecord;
 }
 
 
 long TimeManager::getCurrentTimeInSeconds(){
-	now = RTC.now();
-	long currentDateAsSeconds =dateAsSeconds(now.year(), now.month(), now.day(),now.hour(), now.minute(), now.second());
-	return currentDateAsSeconds;
+	rtc.read();
+	int month = rtc.month-1;
+	long now=dateAsSeconds(rtc.year, month, rtc.day, rtc.hour, rtc.minute, rtc.second);
+	return now;
 }
 
 String TimeManager::getElapsedTimeHoursMinutesSecondsString(long elapsedTime) {

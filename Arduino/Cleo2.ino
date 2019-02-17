@@ -1,6 +1,7 @@
 //this is the firmware for Cleo
 //
 //
+#include <RTCInfoRecord.h>
 #include <WPSSensorRecord.h>
 #include <rgb_lcd.h>
 #include <ChainableLED.h>
@@ -225,7 +226,7 @@ char remFileName[10];
 GeneralFunctions generalFunctions;
 TimeManager timeManager(generalFunctions, Serial);
 SecretManager secretManager(timeManager);
-//SDCardManager sdCardManager(timeManager, generalFunctions, Serial);
+SDCardManager sdCardManager(timeManager, generalFunctions, Serial);
 
 
 void hourlyTasks(long time, int previousHour ){
@@ -996,6 +997,9 @@ void setup() {
 	lcd.begin(16,2);
 	Serial.begin(9600);
 	timeManager.start();
+	sdCardManager.start();
+	long now = timeManager.getCurrentTimeInSeconds();
+	sdCardManager.storeLifeCycleEvent(now, LIFE_CYCLE_EVENT_SETUP_COMPLETED, LIFE_CYCLE_EVENT_COMMA_VALUE);
 	lcd.clear();
 	lcd.setCursor(0, 0);
 

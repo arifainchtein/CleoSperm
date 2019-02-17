@@ -19,6 +19,7 @@ class SDCardManager{
 
 public:
 	SDCardManager(TimeManager & t, GeneralFunctions  & f, HardwareSerial& serial);
+	boolean start();
 	boolean readUntransferredFileFromSDCardByDate(int moveData, boolean sendToSerial,const char *dirName, int date, int month, int year);
 	boolean readUntransferredFileFromSDCard(int moveData, boolean sendToSerial, const char *dirName);
 	void storeRememberedValue(long time, const char *name, float value, String unit);
