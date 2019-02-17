@@ -18,7 +18,7 @@
 #define LEAP_YEAR(_year) ((_year%4)==0)
 
 const int chipSelect = 10; //cs or the save select pin from the sd shield is connected to 10.
-int timeZoneHours=11;
+int timeZoneHours=0;
 int SECONDOFFSET=10;
 static  byte monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
 GravityRtc rtc;
@@ -69,8 +69,6 @@ boolean TimeManager::printTimeToSerial(){
 	_HardSerial.print(rtc.minute);
 	_HardSerial.print(":");
 	_HardSerial.print(rtc.second);;
-	_HardSerial.println("Ok-GetTime");
-	_HardSerial.flush();
 	return true;
 }
 //
