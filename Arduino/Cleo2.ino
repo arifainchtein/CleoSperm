@@ -1071,8 +1071,8 @@ void loop() {
 	float batteryVoltage = getBatteryVoltage();
 	int internalBatteryStateOfCharge = generalFunctions.getStateOfCharge(batteryVoltage);
 	float currentValue = calculateCurrent();
-	//long  lockCapacitorValue=analogRead(LOCK_CAPACITOR_PIN);
-	capacitorVoltage= 5.0;//lockCapacitorValue * (5.0 / 1023.0);
+	long  lockCapacitorValue=analogRead(LOCK_CAPACITOR_PIN);
+	capacitorVoltage= lockCapacitorValue * (5.0 / 1023.0);
 	boolean piIsOn = digitalRead(PI_POWER_PIN);
 	ambientTemperature = dht.readTemperature();
 	ambientHumidity = dht.readHumidity();
