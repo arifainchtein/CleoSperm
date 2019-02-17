@@ -184,17 +184,18 @@ String TimeManager::getCurrentDateForDisplay(){
 
 long TimeManager::getTimeForCodeGeneration(){
 
-	rtc.read();
-	uint8_t seconds = rtc.second+SECONDOFFSET;
-	uint8_t month = rtc.month-1;
-	_HardSerial.println("getTimeForCodeGeneration,about to call dateAsSeconds");
-	uint8_t year = rtc.year;
-	uint8_t date = rtc.day;
-	uint8_t hour = rtc.hour;
-	uint8_t minute=rtc.minute;
+	RTCInfoRecord anRTCInfoRecord =getCurrentDateTime();
+	uint8_t seconds = anRTCInfoRecord.second+SECONDOFFSET;
+	uint8_t month = anRTCInfoRecord.month-1;
+	uint8_t year = anRTCInfoRecord.year;
+
+	//uint8_t date = rtc.day;
+	//uint8_t hour = rtc.hour;
+	//uint8_t minute=rtc.minute;
+	_HardSerial.print("getTimeForCodeGeneration,about to call dateAsSeconds, year=");
 	_HardSerial.println(year);
 	_HardSerial.flush();
-	return dateAsSeconds(year, month, date, hour, minute, seconds);
+	return dateAsSeconds(year, month, anRTCInfoRecord.date, anRTCInfoRecord.hour, anRTCInfoRecord.minute, anRTCInfoRecord.second );
 }
 
 
