@@ -172,7 +172,7 @@ long TimeManager::getTimeForCodeGeneration(){
 	RTCInfoRecord anRTCInfoRecord =getCurrentDateTime();
 	uint8_t seconds = anRTCInfoRecord.second+SECONDOFFSET;
 	uint8_t month = anRTCInfoRecord.month-1;
-	uint8_t year = anRTCInfoRecord.year;
+	uint16_t year = anRTCInfoRecord.year;
 
 
 	//uint8_t date = rtc.day;
