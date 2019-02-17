@@ -1320,10 +1320,13 @@ void loop() {
 			Serial.print("d");
 			Serial.println(r.date);
 			int i;
-				//long seconds;
-				int year, seconds;
-				if(r.year < 69)
-					year+= 2000;
+				long seconds;
+				int year;
+				if(r.year < 69){
+					year+=r.year +  2000;
+				}else{
+					year+=r.year;
+				}
 				// seconds from 1970 till 1 jan 00:00:00 this year
 				seconds= (year-1970)*(60*60*24L*365);
 				Serial.print("p1:");
