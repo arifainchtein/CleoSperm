@@ -1326,7 +1326,7 @@ void loop() {
 				long code=totp. gen_code  (secOrig ) ;
 
 
-			long code =secretManager.generateCode();
+			//long code =secretManager.generateCode();
 			Serial.print("code=");
 						Serial.println(code);
 			Serial.println("Ok-GetCommandCodeGenerationTime");
