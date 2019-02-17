@@ -1,24 +1,24 @@
 //this is the firmware for Cleo
 //
 //
-#include <RTCInfoRecord.h>
-#include <WPSSensorRecord.h>
+#include <DigitalStables/RTCInfoRecord.h>
+#include <DigitalStables/WPSSensorRecord.h>
 #include <rgb_lcd.h>
 #include <ChainableLED.h>
 #include <Wire.h>
 #include <EEPROM.h>
 #include <SPI.h>
 #include <SD.h>
-#include <TimeManager.h>
-#include <GeneralFunctions.h>
-#include <SecretManager.h>
-#include <SDCardManager.h>
+#include <DigitalStables/TimeManager.h>
+#include <DigitalStables/GeneralFunctions.h>
+#include <DigitalStables/SecretManager.h>
+#include <DigitalStables/SDCardManager.h>
 #include "DHT.h"
 #include <OneWire.h>
 #include <avr/sleep.h>
 #include <avr/power.h>
 #include <avr/wdt.h>
-#include "totp.h"
+//#include "totp.h"
 
 
 
