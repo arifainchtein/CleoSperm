@@ -1362,7 +1362,7 @@ void processButtons(){
 		if(currentViewIndex<3){
 			currentViewIndex++;
 		}else if(currentViewIndex==3){
-			currentViewIndex0;
+			currentViewIndex=0;
 		}else if(currentViewIndex==10){
 			//
 			// if we are here it means the user generated a new password
