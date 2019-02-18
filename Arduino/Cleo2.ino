@@ -1359,8 +1359,10 @@ boolean processDefaultCommands(String command, float batteryVoltage){
 
 void processButtons(){
 	if(digitalRead(selectPin)== LOW ){
-		if(currentViewIndex<4){
+		if(currentViewIndex<3){
 			currentViewIndex++;
+		}else if(currentViewIndex==3){
+			currentViewIndex0;
 		}else if(currentViewIndex==10){
 			//
 			// if we are here it means the user generated a new password
@@ -1384,7 +1386,7 @@ void processButtons(){
 		// currentViewIndex = 1 means Generate Password
 		// currentViewIndex = 2 show Network info
 		// currentViewIndex = 3 means shutdown request
-		// currentViewIndex = 4 shutdown in process
+
 
 		if(currentViewIndex==1){
 			currentViewIndex=10;
