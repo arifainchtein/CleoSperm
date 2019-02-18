@@ -223,6 +223,7 @@ char remFileName[10];
 long shutDownRequestedseconds= 0L;
 boolean shuttingDownPiCountdown=false;
 boolean manualShutdown=false;
+boolean waitingManualPiStart=false;
 GeneralFunctions generalFunctions;
 TimeManager timeManager(generalFunctions, Serial);
 SecretManager secretManager(timeManager);
@@ -613,6 +614,11 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 					lcd.print("Turn On Pi?");
 					lcd.setCursor(0, 1);
 					lcd.print("Are You Sure?");
+				}else if(waitingManualPiStart){
+					lcd.print("Waiting for Pi" );
+					lcd.setCursor(0, 1);
+					lcd.print("To Start" );
+
 				}else{
 					lcd.print("Turn Off Pi");
 					lcd.setCursor(0, 1);
@@ -629,8 +635,19 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 				lcd.print(" " );
 				break;
 			}
-		}
 
+			case 35:
+				// the pi was just turned on
+				// manually
+				lcd.clear();
+				lcd.setCursor(0, 0);
+				lcd.print("Waiting for Pi" );
+				lcd.setCursor(0, 1);
+				lcd.print("To Start" );
+				currentViewIndex=3;
+				waitingManualPiStart=true;
+				break;
+			}
 
 	}else if(batteryVoltage>enterWPSVoltage && batteryVoltage<=exitWPSVoltage){
 		if(wpsSleeping){
@@ -1138,6 +1155,7 @@ boolean processDefaultCommands(String command, float batteryVoltage){
 		processed=true;
 	}else if(command.startsWith("PulseStart")){
 		inPulse=true;
+		waitingManualPiStart=false;
 		pulseStartTime = generalFunctions.getValue(command, '#', 1);
 		Serial.println("Ok-PulseStart");
 		Serial.flush();
@@ -1406,9 +1424,14 @@ void processButtons(){
 		}else if(currentViewIndex==3){
 			if(manualShutdown){
 				//
-				// if we are here it means we need to turn
-				// the pi on if the voltage is ok
+				// if we are here it means the
+				// pu was manually turned off and now the
+				// user is turning it on again
+				// set the flag and let
+				// define state turn it on
 				manualShutdown=false;
+				currentViewIndex=35;
+
 			}else{
 				currentViewIndex=30;
 				Serial.println("Shutdown");
