@@ -1395,7 +1395,7 @@ void processButtons(){
 		// currentViewIndex = 3 means shutdown/powerup request
 
 
-		if(currentViewIndex==1 || currentViewIndex=10;){
+		if(currentViewIndex==1 || currentViewIndex==10){
 			currentViewIndex=10;
 			lcd.clear();
 			lcd.setCursor(0, 0);
