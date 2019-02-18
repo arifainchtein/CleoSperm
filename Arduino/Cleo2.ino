@@ -1340,7 +1340,7 @@ boolean processDefaultCommands(String command, float batteryVoltage){
 
 void processButtons(){
 	if(digitalRead(selectPin)== LOW ){
-		if(currentViewIndex<6){
+		if(currentViewIndex<4){
 			currentViewIndex++;
 		}else{
 			currentViewIndex=0;
