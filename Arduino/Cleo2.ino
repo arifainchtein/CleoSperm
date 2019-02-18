@@ -17,9 +17,7 @@
 #include <avr/power.h>
 #include <avr/wdt.h>
 #include <totp.h>
-static  byte monthDays2[]={31,28,31,30,31,30,31,31,30,31,30,31};
 
-#define LEAP_YEAR2(_year) ((_year%4)==0)
 
 //
 // the ambient sensor
