@@ -137,7 +137,7 @@ long wpsCountDownStartSeconds=0L;
 // the //lcd at @Sento:Internal:Actuators:LCD
 
 boolean notInPulse=true;
-boolean showSensorData=true;
+//boolean showSensorData=true;
 int secondsForCommandsToBeExecuted=4;
 int currentCommandSecondsCounter=0;
 volatile int f_wdt=1;
@@ -553,51 +553,52 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 			// that we are not in pulse and not in wps
 			// so display user data according to the value of
 			// currentViewIndex
-			// currentViewIndex = 0 means show data
-			// currentViewIndex = 1 means confirm shutdown
-			// currentViewIndex = 2 shutdown in process
-			// currentViewIndex = 3 means confirm restart
-			// currentViewIndex = 4 restart in process
+			// currentViewIndex = 0 means show main data
+			// currentViewIndex = 1 means Generate Password
+			// currentViewIndex = 2 show Network info
+			// currentViewIndex = 3 means shutdown request
+			// currentViewIndex = 4 shutdown in process
 			// i
 			switch(currentViewIndex){
 			case 0:
-				//
-				// alternate between sensor data and
-				// network info
-				if(showSensorData){
-					lcd.clear();
-					lcd.setCursor(0, 0);
-					lcd.print((int)currentValue);
-					lcd.print("mA ") ;
-					lcd.print(batteryVoltage) ;
-					lcd.print("V ") ;
-					lcd.print(internalBatteryStateOfCharge);
-					lcd.print("%") ;
-					lcd.setCursor(0, 1);
-					lcd.print(timeManager.getCurrentDateTimeForDisplay());
-				}else{
-					lcd.clear();
-					lcd.setCursor(0, 0);
-					lcd.print(currentSSID);
-					lcd.setCursor(0, 1);
-					lcd.print(currentIpAddress) ;
-				}
-				delay(1000);
-				showSensorData=!showSensorData;
+				lcd.clear();
+				lcd.setCursor(0, 0);
+				lcd.print((int)currentValue);
+				lcd.print("mA ") ;
+				lcd.print(batteryVoltage) ;
+				lcd.print("V ") ;
+				lcd.print(internalBatteryStateOfCharge);
+				lcd.print("%") ;
+				lcd.setCursor(0, 1);
+				lcd.print(timeManager.getCurrentDateTimeForDisplay());
 				break;
 
 			case 1:
 				lcd.clear();
 				lcd.setCursor(0, 0);
-				lcd.print("Shutdown");
+				lcd.print("Create Password");
+				lcd.setCursor(0, 1);
+				lcd.print(" ");
+				break;
+			case 2:
+				lcd.clear();
+				lcd.setCursor(0, 0);
+				lcd.print(currentSSID);
+				lcd.setCursor(0, 1);
+				lcd.print(currentIpAddress);
+				break;
+			case 3:
+				lcd.clear();
+				lcd.setCursor(0, 0);
+				lcd.print("Turn Off Pi");
 				lcd.setCursor(0, 1);
 				lcd.print("Are You Sure?");
 				break;
 
-			case 2:
+			case 4:
 				lcd.clear();
 				lcd.setCursor(0, 0);
-				lcd.print("Shutting Down" );
+				lcd.print("Shutting Down Pi" );
 				lcd.setCursor(0, 1);
 				lcd.print("See you soon" );
 				break;
@@ -1336,6 +1337,57 @@ boolean processDefaultCommands(String command, float batteryVoltage){
 	return processed;
 }
 
+
+void processButtons(){
+	if(digitalRead(selectPin)== LOW ){
+		if(currentViewIndex<6){
+			currentViewIndex++;
+		}else{
+			currentViewIndex=0;
+		}
+	}
+	if(digitalRead(actionPin)== LOW ){
+		showingAct=true;
+		// currentViewIndex = 0 means show main data
+		// currentViewIndex = 1 means Generate Password
+		// currentViewIndex = 2 show Network info
+		// currentViewIndex = 3 means shutdown request
+		// currentViewIndex = 4 shutdown in process
+
+		if(currentViewIndex==3){
+			currentViewIndex++;
+			Serial.println("Shutdown");
+			Serial.flush();
+			lcd.clear();
+			lcd.setCursor(0, 0);
+			lcd.print("Shutting Down Pi" );
+			lcd.setCursor(0, 1);
+			lcd.print("See you soon" );
+		}
+//		if(currentViewIndex>=1 && currentViewIndex<=3){
+//			lcd.clear();
+//			lcd.setCursor(0, 0);
+//			lcd.print(ledStatusLine1[currentViewIndex] );
+//			lcd.setCursor(0, 1);
+//			lcd.print("ABCDEFG" );
+//		}else if(currentViewIndex==4){
+//			lcd.clear();
+//			lcd.setCursor(0, 0);
+//			lcd.print("Password Keeper" );
+//			lcd.setCursor(0, 1);
+//			lcd.print("Click Act to See" );
+//		}else if(currentViewIndex==5){
+//			Serial.println("Shutdown");
+//			Serial.flush();
+//			lcd.clear();
+//			lcd.setCursor(0, 0);
+//			lcd.print("Shutting Down" );
+//			lcd.setCursor(0, 1);
+//			lcd.print("See you soon" );
+//		}
+	}
+}
+
 void setup() {
 	// put your setup code here, to run once:
 	lcd.begin(16,2);
@@ -1351,16 +1403,25 @@ void setup() {
 	pinMode(CURRENT_SENSOR, INPUT);
 	pinMode(PI_POWER_PIN, OUTPUT);
 
+	//
+	// the order in cleo2 has  four leds
+	// in two rows of two:
+	// top row-left is led 2 - battery voltage from ra
+	// top row-right is led 1 - MonoNanny Pump Status
+	// bottom row-left is led 3 - Sento temperature
+	// bottom row-right is led 0 - Sento Pump Status
 
 	leds.setColorRGB(0, 255, 255, 0);
 	leds.setColorRGB(1, 255, 0, 0);
 	leds.setColorRGB(2, 255, 0, 255);
 	leds.setColorRGB(3, 255, 255, 0);
 
-	pinMode(selectPin, INPUT);
-	pinMode(actionPin, INPUT);
+	pinMode(selectPin, INPUT_PULLUP);
+	pinMode(actionPin, INPUT_PULLUP);
 	lcd.print("initializing" );
 }
+
+
 
 void loop() {
 
@@ -1368,305 +1429,306 @@ void loop() {
 	//		digitalWrite(PI_POWER_PIN, HIGH);
 	//		powerSupplyOn=true;
 	//	}
-
+	processButtons();
 
 
 	if(!inPulse){
-		selectButtonValue = digitalRead(selectPin);  // read input value
 
-		if (selectButtonValue != selectLastButtonState) {
-			// reset the debouncing timer
-			selectLastDebounceTime = millis();
-			Serial.println("p2=");
-
-		}
-
-		if ((millis() - selectLastDebounceTime) > debounceDelay) {
-			// whatever the reading is at, it's been there for longer
-			// than the debounce delay, so take it as the actual current state:
-			// if the button state has changed:
-
-			if (selectButtonValue != selectButtonState) {
-				//Serial.println("p3=");
-				selectButtonState = selectButtonValue;
-				if (selectButtonState != HIGH) {
-					lastActionTime=millis();
-					//
-					// if we are here then we just clicked this
-					//
-				}
-			}
-		}
-		selectLastButtonState = selectButtonValue;
-		// check and debounce the action button
+		//		selectButtonValue = digitalRead(selectPin);  // read input value
 		//
-		actionButtonValue = digitalRead(actionPin);  // read input value
-		if (actionButtonValue != actionLastButtonState) {
-			// reset the debouncing timer
-			actionLastDebounceTime = millis();
-		}
+		//		if (selectButtonValue != selectLastButtonState) {
+		//			// reset the debouncing timer
+		//			selectLastDebounceTime = millis();
+		//			Serial.println("p2=");
+		//
+		//		}
+		//
+		//		if ((millis() - selectLastDebounceTime) > debounceDelay) {
+		//			// whatever the reading is at, it's been there for longer
+		//			// than the debounce delay, so take it as the actual current state:
+		//			// if the button state has changed:
+		//
+		//			if (selectButtonValue != selectButtonState) {
+		//				//Serial.println("p3=");
+		//				selectButtonState = selectButtonValue;
+		//				if (selectButtonState != HIGH) {
+		//					lastActionTime=millis();
+		//					//
+		//					// if we are here then we just clicked this
+		//					//
+		//				}
+		//			}
+		//		}
+		//		selectLastButtonState = selectButtonValue;
+		//		// check and debounce the action button
+		//		//
+		//		actionButtonValue = digitalRead(actionPin);  // read input value
+		//		if (actionButtonValue != actionLastButtonState) {
+		//			// reset the debouncing timer
+		//			actionLastDebounceTime = millis();
+		//		}
+		//
+		//		if ((millis() - actionLastDebounceTime) > debounceDelay) {
+		//			// whatever the reading is at, it's been there for longer
+		//			// than the debounce delay, so take it as the actual current state:
+		//			// if the button state has changed:
+		//			if (actionButtonValue != actionButtonState) {
+		//				actionButtonState = actionButtonValue;
+		//				if (actionButtonState != HIGH) {
+		//					lastActionTime=millis();
+		//					showingAct=true;
+		//					if(currentViewIndex>=1 && currentViewIndex<=3){
+		//						lcd.clear();
+		//						lcd.setCursor(0, 0);
+		//						lcd.print(ledStatusLine1[currentViewIndex] );
+		//						lcd.setCursor(0, 1);
+		//						lcd.print("ABCDEFG" );
+		//					}else if(currentViewIndex==4){
+		//						lcd.clear();
+		//						lcd.setCursor(0, 0);
+		//						lcd.print("Password Keeper" );
+		//						lcd.setCursor(0, 1);
+		//						lcd.print("Click Act to See" );
+		//					}else if(currentViewIndex==5){
+		//						Serial.println("Shutdown");
+		//						Serial.flush();
+		//						lcd.clear();
+		//						lcd.setCursor(0, 0);
+		//						lcd.print("Shutting Down" );
+		//						lcd.setCursor(0, 1);
+		//						lcd.print("See you soon" );
+		//					}
+		//
+		//
+		//				}
+		//			}
+		//		}
+		//	}
+		//	actionLastButtonState = actionButtonValue;
 
-		if ((millis() - actionLastDebounceTime) > debounceDelay) {
-			// whatever the reading is at, it's been there for longer
-			// than the debounce delay, so take it as the actual current state:
-			// if the button state has changed:
-			if (actionButtonValue != actionButtonState) {
-				actionButtonState = actionButtonValue;
-				if (actionButtonState != HIGH) {
-					lastActionTime=millis();
-					showingAct=true;
-					if(currentViewIndex>=1 && currentViewIndex<=3){
-						lcd.clear();
-						lcd.setCursor(0, 0);
-						lcd.print(ledStatusLine1[currentViewIndex] );
-						lcd.setCursor(0, 1);
-						lcd.print("ABCDEFG" );
-					}else if(currentViewIndex==4){
-						lcd.clear();
-						lcd.setCursor(0, 0);
-						lcd.print("Password Keeper" );
-						lcd.setCursor(0, 1);
-						lcd.print("Click Act to See" );
-					}else if(currentViewIndex==5){
-						Serial.println("Shutdown");
-						Serial.flush();
-						lcd.clear();
-						lcd.setCursor(0, 0);
-						lcd.print("Shutting Down" );
-						lcd.setCursor(0, 1);
-						lcd.print("See you soon" );
+
+
+		wdt_reset();
+
+		float batteryVoltage = getBatteryVoltage();
+		int internalBatteryStateOfCharge = generalFunctions.getStateOfCharge(batteryVoltage);
+		float currentValue = calculateCurrent();
+		long  lockCapacitorValue=analogRead(LOCK_CAPACITOR_PIN);
+		capacitorVoltage= lockCapacitorValue * (5.0 / 1023.0);
+		boolean piIsOn = digitalRead(PI_POWER_PIN);
+		ambientTemperature = dht.readTemperature();
+		ambientHumidity = dht.readHumidity();
+
+
+
+
+
+
+
+		//
+		// Generate the SensorData String
+		toReturn="";
+		//
+		// Sensor Request Queue Position 1
+		//
+		char batteryVoltageStr[15];
+		dtostrf(batteryVoltage,4, 1, batteryVoltageStr);
+		toReturn.concat(batteryVoltageStr) ;
+		toReturn.concat("#") ;
+
+		//
+		// Sensor Request Queue Position 2
+		//
+		char currentValueStr[15];
+		dtostrf(currentValue,4, 0, currentValueStr);
+		toReturn.concat(currentValueStr) ;
+		toReturn.concat("#") ;
+
+		//
+		// Sensor Request Queue Position 3
+		//
+		char capacitorVoltageStr[15];
+		dtostrf(capacitorVoltage,2, 1, capacitorVoltageStr);
+		toReturn.concat(capacitorVoltageStr) ;
+		toReturn.concat("#") ;
+
+
+		//
+		// Sensor Request Queue Position 4
+		//
+		toReturn.concat( internalBatteryStateOfCharge);
+		toReturn.concat("#") ;
+		//
+		// Sensor Request Queue Position 5
+		//
+
+		toReturn.concat( operatingStatus);
+		toReturn.concat("#") ;
+
+		//
+		// Sensor Request Queue Position 6
+		//
+
+		char dailyMinBatteryVoltageStr[15];
+		dtostrf(dailyMinBatteryVoltage,4, 0, dailyMinBatteryVoltageStr);
+		toReturn.concat(dailyMinBatteryVoltageStr) ;
+		toReturn.concat("#") ;
+
+		//
+		// Sensor Request Queue Position 7
+		//
+
+		char dailyMaxBatteryVoltageStr[15];
+		dtostrf(dailyMaxBatteryVoltage,4, 0, dailyMaxBatteryVoltageStr);
+		toReturn.concat(dailyMaxBatteryVoltageStr) ;
+		toReturn.concat("#") ;
+
+		//
+		// Sensor Request Queue Position 8
+		//
+
+		char dailyMinBatteryCurrentStr[15];
+		dtostrf(dailyMinBatteryCurrent,4, 0, dailyMinBatteryCurrentStr);
+		toReturn.concat(dailyMinBatteryCurrentStr) ;
+		toReturn.concat("#") ;
+
+		//
+		// Sensor Request Queue Position 9
+		//
+
+		char dailyMaxBatteryCurrentStr[15];
+		dtostrf(dailyMaxBatteryCurrent,4, 0, dailyMaxBatteryCurrentStr);
+		toReturn.concat(dailyMaxBatteryCurrentStr) ;
+		toReturn.concat("#") ;
+
+		//
+		// Sensor Request Queue Position 10
+		//
+
+		char dailyBatteryOutEnergyStr[15];
+		dtostrf(dailyBatteryOutEnergy,4, 0, dailyBatteryOutEnergyStr);
+		toReturn.concat(dailyBatteryOutEnergyStr) ;
+		toReturn.concat("#") ;
+
+		//
+		// Sensor Request Queue Position 11
+		//
+
+		char dailyPoweredDownInLoopSecondsStr[15];
+		dtostrf(dailyPoweredDownInLoopSeconds,4, 0, dailyPoweredDownInLoopSecondsStr);
+		toReturn.concat(dailyPoweredDownInLoopSecondsStr) ;
+		toReturn.concat("#") ;
+
+		//
+		// Sensor Request Queue Position 12
+		//
+
+		char hourlyBatteryOutEnergyStr[15];
+		dtostrf(hourlyBatteryOutEnergy,4, 0, hourlyBatteryOutEnergyStr);
+		toReturn.concat(hourlyBatteryOutEnergyStr) ;
+		toReturn.concat("#") ;
+		//
+		// Sensor Request Queue Position 13
+		//
+
+		char hourlyPoweredDownInLoopSecondsStr[15];
+		dtostrf(hourlyPoweredDownInLoopSeconds,4, 0, hourlyPoweredDownInLoopSecondsStr);
+		toReturn.concat(hourlyPoweredDownInLoopSecondsStr) ;
+		toReturn.concat("#") ;
+
+		//
+		// Sensor Request Queue Position 14
+		//
+
+		long totalDiskUse=0;//sdCardManager.getDiskUsage();
+		toReturn.concat(totalDiskUse/1024);
+		toReturn.concat("#");
+		//
+		// Sensor Request Queue Position 15
+		//
+
+		toReturn.concat(pauseDuringWPS);
+		toReturn.concat("#");
+		//
+		// Sensor Request Queue Position 16
+		//
+		char ambientTemperatureStr[15];
+		dtostrf(ambientTemperature,4, 0, ambientTemperatureStr);
+		toReturn.concat(ambientTemperatureStr);
+		toReturn.concat("#");
+		//
+		// Sensor Request Queue Position 17
+		//
+		char ambientHumidityStr[15];
+		dtostrf(ambientHumidity,4, 0, ambientHumidityStr);
+		toReturn.concat(ambientHumidityStr);
+		toReturn.concat("#");
+
+		//lcd.clear();
+		//lcd.setCursor(0, 0);
+
+		long now = timeManager.getCurrentTimeInSeconds();
+		poweredDownInLoopSeconds=0;
+		defineState(now,  batteryVoltage, internalBatteryStateOfCharge, currentValue, piIsOn);
+
+
+
+		if( Serial.available() != 0) {
+			// lcd.clear();
+			command = Serial.readString();
+			lcd.setCursor(0, 0);
+			lcd.print(command);
+			boolean commandProcessed = processDefaultCommands( command, batteryVoltage);
+			if(!commandProcessed){
+				if (command.startsWith("UpdateTeleonomeStatus")){
+					// UpdateTeleonomeStatus#2#success#Test
+					//UpdateTeleonomeStatus#3#success#Test
+
+					int id = generalFunctions.getValue(command, '#', 1).toInt();
+					String statusValue = generalFunctions.getValue(command, '#', 2);
+					String info = generalFunctions.getValue(command, '#', 3);
+					ledStatusLine2[id]=info;
+
+					if(statusValue=="success"){
+						leds.setColorRGB(id, 0, 255, 0);
+					}else  if(statusValue=="warning"){
+						leds.setColorRGB(id, 255, 255, 0);
+					}else  if(statusValue=="danger"){
+						leds.setColorRGB(id, 255, 0, 0);
+					}else  if(statusValue=="primary"){
+						leds.setColorRGB(id, 0, 0, 255);
+					}else  if(statusValue=="crisis"){
+						leds.setColorRGB(id, 255, 165, 0);
+					}else  if(statusValue=="off"){
+						leds.setColorRGB(id, 0, 0, 0);
+					}else  if(statusValue=="stale"){
+						leds.setColorRGB(id, 148, 0, 211);
 					}
-
-
+					Serial.println("Ok-UpdateTeleonomeStatus");
+					Serial.flush();
+					delay(delayTime);
+				}else{
+					//
+					// call read to flush the incoming
+					//
+					Serial.read();
+					Serial.println("Failure-Bad Command " + command);
+					Serial.flush();
 				}
 			}
 		}
+		//
+		// this is the end of the loop, to calculate the energy spent on this loop
+		// take the time substract the time at the beginning of the loop (the now variable defined above)
+		// and also substract the seconds spent in powerdownMode
+		// finally add the poweredDownInLoopSeconds to the daily total
+
+		int loopConsumingPowerSeconds = timeManager.getCurrentTimeInSeconds()-now -poweredDownInLoopSeconds;
+		dailyBatteryOutEnergy+= loopConsumingPowerSeconds*currentValue/3600;
+		hourlyBatteryOutEnergy+= loopConsumingPowerSeconds*currentValue/3600;
+		dailyPoweredDownInLoopSeconds+=poweredDownInLoopSeconds;
+		hourlyPoweredDownInLoopSeconds+=poweredDownInLoopSeconds;
+
 	}
-	actionLastButtonState = actionButtonValue;
-
-
-
-	wdt_reset();
-
-	float batteryVoltage = getBatteryVoltage();
-	int internalBatteryStateOfCharge = generalFunctions.getStateOfCharge(batteryVoltage);
-	float currentValue = calculateCurrent();
-	long  lockCapacitorValue=analogRead(LOCK_CAPACITOR_PIN);
-	capacitorVoltage= lockCapacitorValue * (5.0 / 1023.0);
-	boolean piIsOn = digitalRead(PI_POWER_PIN);
-	ambientTemperature = dht.readTemperature();
-	ambientHumidity = dht.readHumidity();
-
-
-
-
-
-
-
-	//
-	// Generate the SensorData String
-	toReturn="";
-	//
-	// Sensor Request Queue Position 1
-	//
-	char batteryVoltageStr[15];
-	dtostrf(batteryVoltage,4, 1, batteryVoltageStr);
-	toReturn.concat(batteryVoltageStr) ;
-	toReturn.concat("#") ;
-
-	//
-	// Sensor Request Queue Position 2
-	//
-	char currentValueStr[15];
-	dtostrf(currentValue,4, 0, currentValueStr);
-	toReturn.concat(currentValueStr) ;
-	toReturn.concat("#") ;
-
-	//
-	// Sensor Request Queue Position 3
-	//
-	char capacitorVoltageStr[15];
-	dtostrf(capacitorVoltage,2, 1, capacitorVoltageStr);
-	toReturn.concat(capacitorVoltageStr) ;
-	toReturn.concat("#") ;
-
-
-	//
-	// Sensor Request Queue Position 4
-	//
-	toReturn.concat( internalBatteryStateOfCharge);
-	toReturn.concat("#") ;
-	//
-	// Sensor Request Queue Position 5
-	//
-
-	toReturn.concat( operatingStatus);
-	toReturn.concat("#") ;
-
-	//
-	// Sensor Request Queue Position 6
-	//
-
-	char dailyMinBatteryVoltageStr[15];
-	dtostrf(dailyMinBatteryVoltage,4, 0, dailyMinBatteryVoltageStr);
-	toReturn.concat(dailyMinBatteryVoltageStr) ;
-	toReturn.concat("#") ;
-
-	//
-	// Sensor Request Queue Position 7
-	//
-
-	char dailyMaxBatteryVoltageStr[15];
-	dtostrf(dailyMaxBatteryVoltage,4, 0, dailyMaxBatteryVoltageStr);
-	toReturn.concat(dailyMaxBatteryVoltageStr) ;
-	toReturn.concat("#") ;
-
-	//
-	// Sensor Request Queue Position 8
-	//
-
-	char dailyMinBatteryCurrentStr[15];
-	dtostrf(dailyMinBatteryCurrent,4, 0, dailyMinBatteryCurrentStr);
-	toReturn.concat(dailyMinBatteryCurrentStr) ;
-	toReturn.concat("#") ;
-
-	//
-	// Sensor Request Queue Position 9
-	//
-
-	char dailyMaxBatteryCurrentStr[15];
-	dtostrf(dailyMaxBatteryCurrent,4, 0, dailyMaxBatteryCurrentStr);
-	toReturn.concat(dailyMaxBatteryCurrentStr) ;
-	toReturn.concat("#") ;
-
-	//
-	// Sensor Request Queue Position 10
-	//
-
-	char dailyBatteryOutEnergyStr[15];
-	dtostrf(dailyBatteryOutEnergy,4, 0, dailyBatteryOutEnergyStr);
-	toReturn.concat(dailyBatteryOutEnergyStr) ;
-	toReturn.concat("#") ;
-
-	//
-	// Sensor Request Queue Position 11
-	//
-
-	char dailyPoweredDownInLoopSecondsStr[15];
-	dtostrf(dailyPoweredDownInLoopSeconds,4, 0, dailyPoweredDownInLoopSecondsStr);
-	toReturn.concat(dailyPoweredDownInLoopSecondsStr) ;
-	toReturn.concat("#") ;
-
-	//
-	// Sensor Request Queue Position 12
-	//
-
-	char hourlyBatteryOutEnergyStr[15];
-	dtostrf(hourlyBatteryOutEnergy,4, 0, hourlyBatteryOutEnergyStr);
-	toReturn.concat(hourlyBatteryOutEnergyStr) ;
-	toReturn.concat("#") ;
-	//
-	// Sensor Request Queue Position 13
-	//
-
-	char hourlyPoweredDownInLoopSecondsStr[15];
-	dtostrf(hourlyPoweredDownInLoopSeconds,4, 0, hourlyPoweredDownInLoopSecondsStr);
-	toReturn.concat(hourlyPoweredDownInLoopSecondsStr) ;
-	toReturn.concat("#") ;
-
-	//
-	// Sensor Request Queue Position 14
-	//
-
-	long totalDiskUse=0;//sdCardManager.getDiskUsage();
-	toReturn.concat(totalDiskUse/1024);
-	toReturn.concat("#");
-	//
-	// Sensor Request Queue Position 15
-	//
-
-	toReturn.concat(pauseDuringWPS);
-	toReturn.concat("#");
-	//
-	// Sensor Request Queue Position 16
-	//
-	char ambientTemperatureStr[15];
-	dtostrf(ambientTemperature,4, 0, ambientTemperatureStr);
-	toReturn.concat(ambientTemperatureStr);
-	toReturn.concat("#");
-	//
-	// Sensor Request Queue Position 17
-	//
-	char ambientHumidityStr[15];
-	dtostrf(ambientHumidity,4, 0, ambientHumidityStr);
-	toReturn.concat(ambientHumidityStr);
-	toReturn.concat("#");
-
-	//lcd.clear();
-	//lcd.setCursor(0, 0);
-
-	long now = timeManager.getCurrentTimeInSeconds();
-	poweredDownInLoopSeconds=0;
-	defineState(now,  batteryVoltage, internalBatteryStateOfCharge, currentValue, piIsOn);
-
-
-
-	if( Serial.available() != 0) {
-		// lcd.clear();
-		command = Serial.readString();
-		lcd.setCursor(0, 0);
-		lcd.print(command);
-		boolean commandProcessed = processDefaultCommands( command, batteryVoltage);
-		if(!commandProcessed){
-			if (command.startsWith("UpdateTeleonomeStatus")){
-// UpdateTeleonomeStatus#1#success#Test
-				//UpdateTeleonomeStatus#3#success#Test
-
-				int id = generalFunctions.getValue(command, '#', 1).toInt();
-				String statusValue = generalFunctions.getValue(command, '#', 2);
-				String info = generalFunctions.getValue(command, '#', 3);
-				ledStatusLine2[id]=info;
-
-				if(statusValue=="success"){
-					leds.setColorRGB(id, 0, 255, 0);
-				}else  if(statusValue=="warning"){
-					leds.setColorRGB(id, 255, 255, 0);
-				}else  if(statusValue=="danger"){
-					leds.setColorRGB(id, 255, 0, 0);
-				}else  if(statusValue=="primary"){
-					leds.setColorRGB(id, 0, 0, 255);
-				}else  if(statusValue=="crisis"){
-					leds.setColorRGB(id, 255, 165, 0);
-				}else  if(statusValue=="off"){
-					leds.setColorRGB(id, 0, 0, 0);
-				}else  if(statusValue=="stale"){
-					leds.setColorRGB(id, 148, 0, 211);
-				}
-				Serial.println("Ok-UpdateTeleonomeStatus");
-				Serial.flush();
-				delay(delayTime);
-			}else{
-				//
-				// call read to flush the incoming
-				//
-				Serial.read();
-				Serial.println("Failure-Bad Command " + command);
-				Serial.flush();
-			}
-		}
-	}
-	//
-	// this is the end of the loop, to calculate the energy spent on this loop
-	// take the time substract the time at the beginning of the loop (the now variable defined above)
-	// and also substract the seconds spent in powerdownMode
-	// finally add the poweredDownInLoopSeconds to the daily total
-
-	int loopConsumingPowerSeconds = timeManager.getCurrentTimeInSeconds()-now -poweredDownInLoopSeconds;
-	dailyBatteryOutEnergy+= loopConsumingPowerSeconds*currentValue/3600;
-	hourlyBatteryOutEnergy+= loopConsumingPowerSeconds*currentValue/3600;
-	dailyPoweredDownInLoopSeconds+=poweredDownInLoopSeconds;
-	hourlyPoweredDownInLoopSeconds+=poweredDownInLoopSeconds;
-
-}
 
 
