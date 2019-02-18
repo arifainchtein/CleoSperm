@@ -86,17 +86,17 @@ long debounceDelay = 60;    // the debounce time; increase if the output flicker
 // and one for the action button
 //
 int selectPin = 4;
-int selectButtonValue=0;
-int selectButtonState;             // the current reading from the input pin
-int selectLastButtonState = LOW;   // the previous reading from the input pin
-long selectLastDebounceTime = 0;  // the last time the output pin was toggled
+//int selectButtonValue=0;
+//int selectButtonState;             // the current reading from the input pin
+//int selectLastButtonState = LOW;   // the previous reading from the input pin
+//long selectLastDebounceTime = 0;  // the last time the output pin was toggled
 
 
 int actionPin = 5;
-int actionButtonValue=0;
-int actionButtonState;             // the current reading from the input pin
-int actionLastButtonState = LOW;   // the previous reading from the input pin
-long actionLastDebounceTime = 0;  //
+//int actionButtonValue=0;
+//int actionButtonState;             // the current reading from the input pin
+//int actionLastButtonState = LOW;   // the previous reading from the input pin
+//long actionLastDebounceTime = 0;  //
 
 
 int PI_POWER_PIN=8;
@@ -229,9 +229,9 @@ SDCardManager sdCardManager(timeManager, generalFunctions, Serial);
 
 void hourlyTasks(long time, int previousHour ){
 
-	//sdCardManager.storeRememberedValue(time,HOURLY_ENERGY, hourlyBatteryOutEnergy, UNIT_MILLI_AMPERES_HOURS);
-	//sdCardManager.storeRememberedValue(time,HOURLY_POWERED_DOWN_IN_LOOP_SECONDS, hourlyPoweredDownInLoopSeconds, UNIT_SECONDS);
-	//sdCardManager.storeRememberedValue(time,HOURLY_OPERATING_IN_LOOP_SECONDS, 3600-hourlyPoweredDownInLoopSeconds, UNIT_SECONDS);
+	sdCardManager.storeRememberedValue(time,HOURLY_ENERGY, hourlyBatteryOutEnergy, UNIT_MILLI_AMPERES_HOURS);
+	sdCardManager.storeRememberedValue(time,HOURLY_POWERED_DOWN_IN_LOOP_SECONDS, hourlyPoweredDownInLoopSeconds, UNIT_SECONDS);
+	sdCardManager.storeRememberedValue(time,HOURLY_OPERATING_IN_LOOP_SECONDS, 3600-hourlyPoweredDownInLoopSeconds, UNIT_SECONDS);
 	hourlyBatteryOutEnergy=0;
 	hourlyPoweredDownInLoopSeconds=0;
 }
@@ -242,17 +242,17 @@ void hourlyTasks(long time, int previousHour ){
 void dailyTasks(long time, int yesterdayDate, int yesterdayMonth, uint16_t yesterdayYear ){
 	//
 	// move whatever is in untrasferred to the correct date
-	//boolean result = sdCardManager.readUntransferredFileFromSDCardByDate( 1,false, RememberedValueDataDirName,yesterdayDate, yesterdayMonth, yesterdayYear );
-	//result = sdCardManager.readUntransferredFileFromSDCardByDate( 1,false, WPSSensorDataDirName,yesterdayDate, yesterdayMonth, yesterdayYear);
-	//result = sdCardManager.readUntransferredFileFromSDCardByDate( 1,false, LifeCycleDataDirName,yesterdayDate, yesterdayMonth, yesterdayYear);
+	boolean result = sdCardManager.readUntransferredFileFromSDCardByDate( 1,false, RememberedValueDataDirName,yesterdayDate, yesterdayMonth, yesterdayYear );
+	result = sdCardManager.readUntransferredFileFromSDCardByDate( 1,false, WPSSensorDataDirName,yesterdayDate, yesterdayMonth, yesterdayYear);
+	result = sdCardManager.readUntransferredFileFromSDCardByDate( 1,false, LifeCycleDataDirName,yesterdayDate, yesterdayMonth, yesterdayYear);
 	long yesterdayDateSeconds = timeManager.dateAsSeconds(yesterdayYear,yesterdayMonth,yesterdayDate, 0, 0, 0);
-	//sdCardManager.storeRememberedValue(time,DAILY_STATS_TIMESTAMP, yesterdayDateSeconds, UNIT_NO_UNIT);
-	//sdCardManager.storeRememberedValue(time,DAILY_MINIMUM_BATTERY_VOLTAGE, dailyMinBatteryVoltage, UNIT_VOLT);
-	//sdCardManager.storeRememberedValue(time,DAILY_MAXIMUM_BATTERY_VOLTAGE, dailyMaxBatteryVoltage, UNIT_VOLT);
-	//sdCardManager.storeRememberedValue(time,DAILY_MINIMUM_BATTERY_CURRENT, dailyMinBatteryCurrent, UNIT_MILLI_AMPERES);
-	//sdCardManager.storeRememberedValue(time,DAILY_MAXIMUM_BATTERY_CURRENT, dailyMaxBatteryCurrent, UNIT_MILLI_AMPERES);
-	//sdCardManager.storeRememberedValue(time,DAILY_ENERGY, dailyBatteryOutEnergy, UNIT_MILLI_AMPERES_HOURS);
-	//sdCardManager.storeRememberedValue(time,DAILY_POWERED_DOWN_IN_LOOP_SECONDS, dailyPoweredDownInLoopSeconds, UNIT_SECONDS);
+	sdCardManager.storeRememberedValue(time,DAILY_STATS_TIMESTAMP, yesterdayDateSeconds, UNIT_NO_UNIT);
+	sdCardManager.storeRememberedValue(time,DAILY_MINIMUM_BATTERY_VOLTAGE, dailyMinBatteryVoltage, UNIT_VOLT);
+	sdCardManager.storeRememberedValue(time,DAILY_MAXIMUM_BATTERY_VOLTAGE, dailyMaxBatteryVoltage, UNIT_VOLT);
+	sdCardManager.storeRememberedValue(time,DAILY_MINIMUM_BATTERY_CURRENT, dailyMinBatteryCurrent, UNIT_MILLI_AMPERES);
+	sdCardManager.storeRememberedValue(time,DAILY_MAXIMUM_BATTERY_CURRENT, dailyMaxBatteryCurrent, UNIT_MILLI_AMPERES);
+	sdCardManager.storeRememberedValue(time,DAILY_ENERGY, dailyBatteryOutEnergy, UNIT_MILLI_AMPERES_HOURS);
+	sdCardManager.storeRememberedValue(time,DAILY_POWERED_DOWN_IN_LOOP_SECONDS, dailyPoweredDownInLoopSeconds, UNIT_SECONDS);
 	dailyMinBatteryVoltage = 9999.0;
 	dailyMaxBatteryVoltage = -1.0;
 	dailyMinBatteryCurrent = 9999.0;
@@ -494,10 +494,10 @@ void turnPiOffForced(long time){
 	delay(1000);
 	float batteryVoltageAfter = getBatteryVoltage();
 	float voltageDifferential = 1-(batteryVoltageBefore/batteryVoltageAfter);
-	//sdCardManager.storeRememberedValue(time,FORCED_PI_TURN_OFF,0 , operatingStatus);
-	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_BEFORE_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_ATER_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON, voltageDifferential, UNIT_PERCENTAGE);
+	sdCardManager.storeRememberedValue(time,FORCED_PI_TURN_OFF,0 , operatingStatus);
+	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_BEFORE_PI_ON, batteryVoltageBefore, UNIT_VOLT);
+	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_ATER_PI_ON, batteryVoltageBefore, UNIT_VOLT);
+	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON, voltageDifferential, UNIT_PERCENTAGE);
 }
 
 void turnPiOff(long time){
@@ -506,10 +506,10 @@ void turnPiOff(long time){
 	delay(1000);
 	float batteryVoltageAfter = getBatteryVoltage();
 	float voltageDifferential = 1-(batteryVoltageBefore/batteryVoltageAfter);
-	//sdCardManager.storeRememberedValue(time,PI_TURN_OFF,0 , operatingStatus);
-	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_BEFORE_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_ATER_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON, voltageDifferential, UNIT_PERCENTAGE);
+	sdCardManager.storeRememberedValue(time,PI_TURN_OFF,0 , operatingStatus);
+	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_BEFORE_PI_ON, batteryVoltageBefore, UNIT_VOLT);
+	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_ATER_PI_ON, batteryVoltageBefore, UNIT_VOLT);
+	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON, voltageDifferential, UNIT_PERCENTAGE);
 }
 
 
@@ -520,9 +520,9 @@ void turnPiOn(long time){
 	float batteryVoltageAfter = getBatteryVoltage();
 	float voltageDifferential = 1-(batteryVoltageAfter/batteryVoltageBefore);
 
-	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_BEFORE_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_ATER_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	//sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON, voltageDifferential, UNIT_PERCENTAGE);
+	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_BEFORE_PI_ON, batteryVoltageBefore, UNIT_VOLT);
+	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_ATER_PI_ON, batteryVoltageBefore, UNIT_VOLT);
+	sdCardManager.storeRememberedValue(time,BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON, voltageDifferential, UNIT_PERCENTAGE);
 }
 
 
@@ -1425,14 +1425,11 @@ void setup() {
 
 void loop() {
 
-	//	if(!powerSupplyOn){
-	//		digitalWrite(PI_POWER_PIN, HIGH);
-	//		powerSupplyOn=true;
-	//	}
+
 	processButtons();
+	wdt_reset();
 
-
-	if(!inPulse){
+	//if(!inPulse){
 
 		//		selectButtonValue = digitalRead(selectPin);  // read input value
 		//
@@ -1508,7 +1505,7 @@ void loop() {
 
 
 
-		wdt_reset();
+
 
 		float batteryVoltage = getBatteryVoltage();
 		int internalBatteryStateOfCharge = generalFunctions.getStateOfCharge(batteryVoltage);
