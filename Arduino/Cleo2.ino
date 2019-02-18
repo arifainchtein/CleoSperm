@@ -222,7 +222,7 @@ char remFileName[10];
 
 long shutDownRequestedseconds= 0L;
 boolean shuttingDownPiCountdown=false;
-
+boolean manualShutdown=false;
 GeneralFunctions generalFunctions;
 TimeManager timeManager(generalFunctions, Serial);
 SecretManager secretManager(timeManager);
@@ -540,6 +540,8 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 
 		if(currentSecondsToPowerOff<=0){
 			shuttingDownPiCountdown=false;
+			manualShutdown=true;
+			inPulse=false;
 			turnPiOff(time);
 			sdCardManager.storeLifeCycleEvent(time, LIFE_CYCLE_MANUAL_SHUTDOWN, LIFE_CYCLE_EVENT_COMMA_VALUE);
 			lcd.print("Pi is OFF");
@@ -548,7 +550,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 			lcd.print(	currentSecondsToPowerOff);
 		}
 	}else if(batteryVoltage>exitWPSVoltage){
-		if(!piIsOn)turnPiOn(time);
+		if(!piIsOn && !manualShutdown)turnPiOn(time);
 		operatingStatus="Normal";
 		lcd.setRGB(0, 225, 0);
 		operatingStatus="Normal";
@@ -607,9 +609,16 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 			case 3:
 				lcd.clear();
 				lcd.setCursor(0, 0);
-				lcd.print("Turn Off Pi");
-				lcd.setCursor(0, 1);
-				lcd.print("Are You Sure?");
+				if(manualShutdown){
+					lcd.print("Turn On Pi?");
+					lcd.setCursor(0, 1);
+					lcd.print("Are You Sure?");
+				}else{
+					lcd.print("Turn Off Pi")
+					lcd.setCursor(0, 1);
+					lcd.print("Are You Sure?");
+				}
+
 				break;
 
 			case 30:
@@ -1383,10 +1392,10 @@ void processButtons(){
 		// currentViewIndex = 0 means show main data
 		// currentViewIndex = 1 means Generate Password
 		// currentViewIndex = 2 show Network info
-		// currentViewIndex = 3 means shutdown request
+		// currentViewIndex = 3 means shutdown/powerup request
 
 
-		if(currentViewIndex==1){
+		if(currentViewIndex==1 || currentViewIndex=10;){
 			currentViewIndex=10;
 			lcd.clear();
 			lcd.setCursor(0, 0);
@@ -1395,16 +1404,26 @@ void processButtons(){
 			char*  pass = generalFunctions.generatePassword();
 			lcd.print(pass );
 		}else if(currentViewIndex==3){
-			currentViewIndex=30;
-			Serial.println("Shutdown");
-			Serial.flush();
-			lcd.clear();
-			lcd.setCursor(0, 0);
-			lcd.print("Shutting Down Pi" );
-			lcd.setCursor(0, 1);
-			lcd.print(" " );
-			shutDownRequestedseconds= timeManager.getCurrentTimeInSeconds();
-			shuttingDownPiCountdown=true;
+			if(manualShutdown){
+				//
+				// if we are here it means we need to turn
+				// the pi on if the voltage is ok
+				manualShutdown=false;
+			}else{
+				currentViewIndex=30;
+				Serial.println("Shutdown");
+				Serial.flush();
+				lcd.clear();
+				lcd.setCursor(0, 0);
+				lcd.print("Shutting Down Pi" );
+				lcd.setCursor(0, 1);
+				lcd.print(" " );
+				shutDownRequestedseconds= timeManager.getCurrentTimeInSeconds();
+				shuttingDownPiCountdown=true;
+			}
+
+
+
 
 		}
 
