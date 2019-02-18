@@ -546,6 +546,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 			turnPiOff(time);
 			sdCardManager.storeLifeCycleEvent(time, LIFE_CYCLE_MANUAL_SHUTDOWN, LIFE_CYCLE_EVENT_COMMA_VALUE);
 			lcd.print("Pi is OFF");
+			currentViewIndex=3;
 		}else{
 			lcd.print("in ");
 			lcd.print(	currentSecondsToPowerOff);
