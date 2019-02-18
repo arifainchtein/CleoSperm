@@ -634,7 +634,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 				lcd.setCursor(0, 1);
 				lcd.print(" " );
 				break;
-			}
+
 
 			case 35:
 				// the pi was just turned on
@@ -648,7 +648,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 				waitingManualPiStart=true;
 				break;
 			}
-
+		}
 	}else if(batteryVoltage>enterWPSVoltage && batteryVoltage<=exitWPSVoltage){
 		if(wpsSleeping){
 			//delay(1000);
