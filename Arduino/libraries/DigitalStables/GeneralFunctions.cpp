@@ -8,8 +8,22 @@
 #include "Arduino.h"
 #include "GeneralFunctions.h"
 
+#define PASSLENGTH 8
+char *alphabeth = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'?^&/%$£-+";
+const long alphabethLength = 70;//sizeof(alphabeth);
+
+
 GeneralFunctions::GeneralFunctions(){
 
+}
+
+char* GeneralFunctions::generatePassword(){
+	static char pass[PASSLENGTH+1];
+	for (int n = 0; n < PASSLENGTH; n++){
+		pass[n] = alphabeth[random(0, alphabethLength)];
+	}
+	pass[PASSLENGTH] = '\0';
+	return pass;
 }
 
 

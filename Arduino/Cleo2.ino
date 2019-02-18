@@ -1354,7 +1354,15 @@ void processButtons(){
 		// currentViewIndex = 3 means shutdown request
 		// currentViewIndex = 4 shutdown in process
 
-		if(currentViewIndex==3){
+		if(currentViewIndex==2){
+			currentViewIndex++;
+			lcd.clear();
+			lcd.setCursor(0, 0);
+			lcd.print("New Password" );
+			lcd.setCursor(0, 1);
+			char pass = generalFunctions.generatePassword();
+			lcd.print(pass );
+		}else if(currentViewIndex==3){
 			currentViewIndex++;
 			Serial.println("Shutdown");
 			Serial.flush();

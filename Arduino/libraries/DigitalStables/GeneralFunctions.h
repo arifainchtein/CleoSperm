@@ -15,6 +15,7 @@ public:
 	String getValue(String data, char separator, int index);
 	int getStateOfCharge(double batteryVoltage);
 	float stringToFloat(String s);
+	char * generatePassword();
 };
 #endif /* GENERALFUNCTIONS_H_ */
 
