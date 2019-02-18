@@ -614,7 +614,7 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 					lcd.setCursor(0, 1);
 					lcd.print("Are You Sure?");
 				}else{
-					lcd.print("Turn Off Pi")
+					lcd.print("Turn Off Pi");
 					lcd.setCursor(0, 1);
 					lcd.print("Are You Sure?");
 				}
