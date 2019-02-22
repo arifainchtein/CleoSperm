@@ -46,7 +46,6 @@ public:
   void close();
   operator bool();
   char * name();
-
   boolean isDirectory(void);
   File openNextFile(uint8_t mode = O_RDONLY);
   void rewindDirectory(void);
@@ -94,6 +93,9 @@ public:
   
   boolean rmdir(const char *filepath);
   boolean rmdir(const String &filepath) { return rmdir(filepath.c_str()); }
+  byte blocks
+  uint32_t get_total_Kb(){return root.isOpen() ? card.cardSize()/2:0;}
+ // uint32_t get_free_Kb(){return root.isOpen() ? (volume.freeClusterCount()*volume.blocksPerCluster())/2:0;}
 
 private:
 

@@ -216,10 +216,10 @@ const char  *WPSSensorDataDirName="WPSSensr";
 const char  *LifeCycleDataDirName="LifeCycl";
 const char  *RememberedValueDataDirName  = "RememVal";
 const char  *unstraferedFileName ="Untransf.txt";
-char sensorDirName[10];
-char lifeCycleFileName[10];
 char remFileName[10];
 
+char sensorDirName[10];
+char lifeCycleFileName[10];
 long shutDownRequestedseconds= 0L;
 boolean shuttingDownPiCountdown=false;
 boolean manualShutdown=false;
@@ -612,9 +612,9 @@ void defineState(long time, float batteryVoltage,int internalBatteryStateOfCharg
 				lcd.clear();
 				lcd.setCursor(0, 0);
 				if(manualShutdown){
-					lcd.print("Turn On Pi?");
+					lcd.print("Pi is Off");
 					lcd.setCursor(0, 1);
-					lcd.print("Are You Sure?");
+					lcd.print("Turn On Pi?");
 				}else if(waitingManualPiStart){
 					lcd.print("Waiting for Pi" );
 					lcd.setCursor(0, 1);
@@ -1477,10 +1477,10 @@ void setup() {
 	// bottom row-left is led 3 - Sento temperature
 	// bottom row-right is led 0 - Sento Pump Status
 
-	leds.setColorRGB(0, 255, 255, 0);
-	leds.setColorRGB(1, 255, 0, 0);
+	leds.setColorRGB(0, 255, 0, 255);
+	leds.setColorRGB(1, 255, 0, 255);
 	leds.setColorRGB(2, 255, 0, 255);
-	leds.setColorRGB(3, 255, 255, 0);
+	leds.setColorRGB(3, 255, 0, 255);
 
 	pinMode(selectPin, INPUT_PULLUP);
 	pinMode(actionPin, INPUT_PULLUP);
